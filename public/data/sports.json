@@ -1,0 +1,6 @@
+[
+  { "label": "Fútbol", "value": "futbol" },
+  { "label": "Basketball", "value": "basketball" },
+  { "label": "Volleyball", "value": "volleyball" },
+  { "label": "Béisbol", "value": "beisbol" }
+]
