@@ -1,0 +1,46 @@
+{
+  "disponibles": [
+    {
+      "id": "match-001",
+      "lugar": "Canchas 'El Polideportivo'",
+      "fecha": "2026-02-28",
+      "hora": "18:00",
+      "numJugadores": 8,
+      "maxJugadores": 10,
+      "deporte": "Fútbol 5",
+      "descripcion": "Partido amistoso para sudar la camiseta. Nivel intermedio, traigan hidratación."
+    },
+    {
+      "id": "match-002",
+      "lugar": "Club de Tenis Suchiapa",
+      "fecha": "2026-03-02",
+      "hora": "08:30",
+      "numJugadores": 1,
+      "maxJugadores": 2,
+      "deporte": "Tenis",
+      "descripcion": "Práctica matutina. Busco compañero para pelotear un rato."
+    },
+    {
+      "id": "match-003",
+      "lugar": "Cancha Techada Centro",
+      "fecha": "2026-03-05",
+      "hora": "20:00",
+      "numJugadores": 6,
+      "maxJugadores": 10,
+      "deporte": "Básquetbol",
+      "descripcion": "Reta de 5 vs 5. Ambiente relajado pero competitivo."
+    }
+  ],
+  "mis_partidos": [
+    {
+      "id": "match-004",
+      "lugar": "Canchas 'El Polideportivo'",
+      "fecha": "2026-02-25",
+      "hora": "19:00",
+      "numJugadores": 10,
+      "maxJugadores": 10,
+      "deporte": "Fútbol 5",
+      "descripcion": "Torneo local - Jornada 3. ¡Llegar puntuales!"
+    }
+  ]
+}

@@ -1,38 +1,13 @@
-import React from 'react';
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
-import { AuthLayout } from '@/layouts/AuthLayout';
-import { LoginPage } from '@/pages/LoginPage';
-import { RegisterPage } from '@/pages/RegisterPage';
-import MainPage from '@/pages/MainPage';
-import Header from '@/features/main/components/Header';
+import React from "react";
+import { AppRoutes } from "./routes";
 
 const App: React.FC = () => {
   return (
-    <div className="min-h-screen bg-slate-950">
-      <Header />
-      <div className="overflow-y-auto">
-        <Routes>
-          {/* Main Page - Ruta Raíz */}
-          <Route path="/" element={<MainPage />} />
-
-          {/* Authentication Routes */}
-          <Route
-            path="/auth"
-            element={
-              <AuthLayout>
-                <Outlet />
-              </AuthLayout>
-            }
-          >
-            <Route path="login" element={<LoginPage />} />
-            <Route path="registro" element={<RegisterPage />} />
-            <Route index element={<Navigate to="/auth/login" replace />} />
-          </Route>
-
-          {/* Catch all - Redirige a home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </div>
+    <div className="min-h-screen bg-slate-950 text-white font-sans">
+      {/* Aquí ya NO ponemos <BrowserRouter> ni <AuthProvider> 
+          porque ya los pusiste en el main.tsx. 
+      */}
+      <AppRoutes />
     </div>
   );
 };

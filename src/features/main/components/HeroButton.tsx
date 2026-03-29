@@ -1,8 +1,5 @@
 import React from 'react';
 
-/**
- * Componente HeroButton - Botón responsivo para la sección Hero
- */
 interface HeroButtonProps {
   children: React.ReactNode;
   onClick?: () => void;

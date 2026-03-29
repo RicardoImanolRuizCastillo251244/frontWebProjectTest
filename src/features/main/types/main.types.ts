@@ -2,8 +2,6 @@
  * Tipos específicos de la página principal
  */
 
-import { Match } from '../../../types/match.types';
-
 export interface MainPageContent {
   heroTitle: string;
   heroSubtitle: string;
@@ -53,4 +51,32 @@ export interface MatchesVisualizationProps {
 export interface FooterProps {
   brandName: string;
   year?: number;
+}
+export interface MediaStat {
+  id: string;
+  iconSrc: string;
+  label: string;
+  altText: string;
+}
+
+export interface MediaSectionProps {
+  className?: string;
+}
+
+export interface Match {
+  idMatch: number;      // <--- Cambiado de 'id' a 'idMatch'
+  idDeporte: number;    // <--- Agregado para que coincida con Sequelize
+  deporte: string;
+  fecha: string;
+  hora: string;
+  lugar: string;
+  maxJugadores: number;
+  numJugadores: number; // Ya no es opcional, lo necesitamos siempre
+  descripcion: string | null;
+  isJoined?: boolean;   // Agregado para la lógica de las pestañas
+}
+
+export interface MatchesApiResponse {
+  disponibles: Match[];
+  mis_partidos: Match[];
 }

@@ -2,43 +2,46 @@ import React from 'react';
 import { Input } from '@/components/Input';
 import { Select } from '@/components/Select';
 import { Button } from '@/components/Button';
-import { locationData } from '../data/locationData';
-import { sportData } from '../data/sportData';
-import type { RegisterFormState, RegisterFormHandlers } from '../types/register.types';
-
-type RegisterFormProps = RegisterFormState & RegisterFormHandlers;
+import type { RegisterFormProps, Deporte, Lugar } from '../types/register.types';
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({
   nombre,
   correo,
-  contraseña,
-  confirmarContraseña,
-  ubicacion,
-  deporteFavorito,
+  contrasena,
+  confirmarContrasena,
+  idLugar,
+  idDeporteFavorito,
+  listaDeportes = [],
+  listaLugares = [],
+  loading,
+  error,
   setNombre,
   setCorreo,
-  setContraseña,
-  setConfirmarContraseña,
-  setUbicacion,
-  setDeporteFavorito,
+  setContrasena,
+  setConfirmarContrasena,
+  setIdLugar,
+  setIdDeporteFavorito,
   handleSubmit,
 }) => (
   <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-    {/* Grid de dos columnas con 3 campos a cada lado */}
+    {error && (
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded relative">
+        {error}
+      </div>
+    )}
+
     <div className="grid grid-cols-2 gap-4">
       {/* COLUMNA IZQUIERDA */}
       <div className="flex flex-col gap-4">
-        {/* Campo 1: Nombre */}
         <Input
           id="register-nombre"
           type="text"
           value={nombre}
           onChange={setNombre}
-          placeholder="Nombre"
+          placeholder="Nombre de usuario"
           required
         />
 
-        {/* Campo 2: Correo */}
         <Input
           id="register-correo"
           type="email"
@@ -49,13 +52,15 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           required
         />
 
-        {/* Campo 3: Deporte Favorito */}
         <Select
           id="register-deporte"
-          value={deporteFavorito}
-          onChange={setDeporteFavorito}
+          value={idDeporteFavorito}
+          onChange={setIdDeporteFavorito}
           placeholder="Selecciona tu deporte"
-          options={sportData}
+          options={listaDeportes.map((d: Deporte) => ({ 
+            value: d.idDeporte.toString(), 
+            label: d.nombreDeporte 
+          }))}
           ariaLabel="Deporte favorito"
           required
         />
@@ -63,44 +68,43 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
       {/* COLUMNA DERECHA */}
       <div className="flex flex-col gap-4">
-        {/* Campo 4: Contraseña */}
         <Input
-          id="register-contraseña"
+          id="register-contrasena"
           type="password"
-          value={contraseña}
-          onChange={setContraseña}
+          value={contrasena}
+          onChange={setContrasena}
           placeholder="Contraseña"
           autoComplete="new-password"
           required
         />
 
-        {/* Campo 5: Confirmar Contraseña */}
         <Input
-          id="register-confirmar-contraseña"
+          id="register-confirmar-contrasena"
           type="password"
-          value={confirmarContraseña}
-          onChange={setConfirmarContraseña}
+          value={confirmarContrasena}
+          onChange={setConfirmarContrasena}
           placeholder="Confirmar contraseña"
           autoComplete="new-password"
           required
         />
 
-        {/* Campo 6: Ubicación */}
         <Select
           id="register-ubicacion"
-          value={ubicacion}
-          onChange={setUbicacion}
+          value={idLugar}
+          onChange={setIdLugar}
           placeholder="Selecciona tu ubicación"
-          options={locationData}
+          options={listaLugares.map((l: Lugar) => ({ 
+            value: l.idLugar.toString(), 
+            label: l.nombreLugar 
+          }))}
           ariaLabel="Ubicación"
           required
         />
       </div>
     </div>
 
-    {/* Botón de envío (ancho completo) */}
-    <Button type="submit" className="mt-2">
-      Registrarse
+    <Button type="submit" className="mt-2" disabled={loading}>
+      {loading ? 'Cargando...' : 'Registrarse'}
     </Button>
   </form>
 );

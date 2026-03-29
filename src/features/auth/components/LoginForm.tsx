@@ -1,38 +1,40 @@
+// ARCHIVO: src/features/auth/components/LoginForm.tsx
 import React from 'react';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
-import type { LoginFormState, LoginFormHandlers } from '../types/login.types';
+import { useLoginForm } from '../hooks/useLoginForm';
 
-type LoginFormProps = LoginFormState & LoginFormHandlers;
+export const LoginForm: React.FC = () => {
+  const { usuario, password, setUsuario, setPassword, handleSubmit, error, isLoading } = useLoginForm();
 
-export const LoginForm: React.FC<LoginFormProps> = ({
-  usuario,
-  password,
-  setUsuario,
-  setPassword,
-  handleSubmit,
-}) => (
-  <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-    <Input
-      id="login-usuario"
-      type="text"
-      value={usuario}
-      onChange={setUsuario}
-      placeholder="Correo electrónico"
-      autoComplete="gmail"
-      required
-    />
-    <Input
-      id="login-password"
-      type="password"
-      value={password}
-      onChange={setPassword}
-      placeholder="Contraseña"
-      autoComplete="current-password"
-      required
-    />
-    <Button type="submit" className="mt-2">
-      Iniciar sesión
-    </Button>
-  </form>
-);
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <Input
+        id="login-usuario"
+        type="text" // Validación nativa de email
+        value={usuario}
+        onChange={setUsuario}
+        placeholder="Correo electrónico"
+        required
+      />
+      <Input
+        id="login-password"
+        type="password"
+        value={password}
+        onChange={setPassword}
+        placeholder="Contraseña"
+        required
+      />
+
+      {error && (
+        <p className="text-red-500 text-xs bg-red-500/10 p-2 rounded border border-red-500/20">
+          {error}
+        </p>
+      )}
+
+      <Button type="submit" disabled={isLoading} className="mt-2">
+        {isLoading ? 'Cargando...' : 'Iniciar sesión'}
+      </Button>
+    </form>
+  );
+};

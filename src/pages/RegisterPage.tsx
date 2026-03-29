@@ -7,18 +7,26 @@ import logoCourtUrl from '@/assets/images/logoCourt.png';
 
 export const RegisterPage: React.FC = () => {
   const {
+    // Datos de los inputs
     nombre,
     correo,
-    contraseña,
-    confirmarContraseña,
-    ubicacion,
-    deporteFavorito,
+    contrasena,
+    confirmarContrasena,
+    idLugar,
+    idDeporteFavorito,
+    // Setters
     setNombre,
     setCorreo,
-    setContraseña,
-    setConfirmarContraseña,
-    setUbicacion,
-    setDeporteFavorito,
+    setContrasena,
+    setConfirmarContrasena,
+    setIdLugar,
+    setIdDeporteFavorito,
+    // Listas dinámicas del back
+    listaDeportes,
+    listaLugares,
+    // Estado y envío
+    loading,
+    error,
     handleSubmit,
   } = useRegisterForm();
 
@@ -30,22 +38,29 @@ export const RegisterPage: React.FC = () => {
         ariaLabel="Crear cuenta"
       >
         <RegisterForm
+          // Pasamos todo lo que el Form necesita
           nombre={nombre}
           correo={correo}
-          contraseña={contraseña}
-          confirmarContraseña={confirmarContraseña}
-          ubicacion={ubicacion}
-          deporteFavorito={deporteFavorito}
+          contrasena={contrasena}
+          confirmarContrasena={confirmarContrasena}
+          idLugar={idLugar}
+          idDeporteFavorito={idDeporteFavorito}
+          listaDeportes={listaDeportes}
+          listaLugares={listaLugares}
           setNombre={setNombre}
           setCorreo={setCorreo}
-          setContraseña={setContraseña}
-          setConfirmarContraseña={setConfirmarContraseña}
-          setUbicacion={setUbicacion}
-          setDeporteFavorito={setDeporteFavorito}
+          setContrasena={setContrasena}
+          setConfirmarContrasena={setConfirmarContrasena}
+          setIdLugar={setIdLugar}
+          setIdDeporteFavorito={setIdDeporteFavorito}
           handleSubmit={handleSubmit}
+          loading={loading}
+          error={error}
         />
       </BipartiteCard>
+
       <div className="mt-6 w-full max-w-md h-0.5 bg-white/40" aria-hidden />
+      
       <p
         className="mt-3 text-center text-sm text-slate-200"
         style={{ fontFamily: 'ABeeZee, sans-serif' }}

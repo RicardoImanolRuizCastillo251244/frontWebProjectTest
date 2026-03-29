@@ -1,0 +1,10 @@
+{
+  "id": "user-001",
+  "username": "GamerChiapas",
+  "email": "jugador@suchiapa.com",
+  "stats": {
+    "played": 45,
+    "won": 27,
+    "lost": 18
+  }
+}

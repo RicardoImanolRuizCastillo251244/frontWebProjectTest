@@ -6,7 +6,7 @@ export const locationData = [
 // Función para consumir los datos desde el JSON (como si fuera una API real)
 export const fetchLocations = async () => {
   try {
-    const response = await fetch('/data/cosas.json');
+    const response = await fetch('/data/locations.json');
     if (!response.ok) throw new Error('Error al cargar ubicaciones');
     return await response.json();
   } catch (error) {

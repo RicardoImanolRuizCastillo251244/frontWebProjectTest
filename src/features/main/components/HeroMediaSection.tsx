@@ -2,33 +2,23 @@ import React from 'react';
 import Hero from './Hero';
 import MediaSection from './MediaSection';
 
-/**
- * Componente HeroMediaSection - Combina presentación (69%) y media (31%)
- * Se muestran una debajo de la otra ocupando exactamente el viewport
- * 
- * Cálculos basados en Figma (MacBook Pro 16"):
- * - Hero: 684px / (684 + 306) = 69.1%
- * - Media: 306px / (684 + 306) = 30.9%
- * 
- * Responsive para cualquier pantalla manteniendo proporción
- */
 interface HeroMediaSectionProps {
   backgroundImage: string;
+  onOpenModal: () => void;
 }
 
 const HeroMediaSection: React.FC<HeroMediaSectionProps> = ({
   backgroundImage,
+  onOpenModal,
 }) => {
   return (
-    <section className="w-full flex flex-col relative overflow-hidden" style={{ height: 'calc(100vh - 80px)' }}>
-      {/* Hero Section - 69% */}
-      <div className="basis-[69%] w-full relative overflow-hidden">
-        <Hero backgroundImage={backgroundImage} />
+    <section className="w-full flex flex-col relative min-h-[calc(100vh-80px)] md:h-[calc(100vh-80px)]">
+      <div className="w-full relative flex flex-col flex-grow md:flex-none md:basis-[69%]">
+        <Hero backgroundImage={backgroundImage} onOpenModal={onOpenModal} />
       </div>
 
-      {/* Media Section - 31% */}
-      <div className="basis-[31%] w-full relative overflow-hidden">
-        <MediaSection />
+      <div className="w-full relative flex flex-col shrink-0 md:basis-[31%]">
+        <MediaSection features={[]} />
       </div>
     </section>
   );

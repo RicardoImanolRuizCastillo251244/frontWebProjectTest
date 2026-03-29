@@ -1,22 +1,52 @@
 import { useState } from 'react';
-import type { LoginFormState, LoginFormHandlers } from '../types/login.types';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { authService } from '../services/auth.service';
 
-export type UseLoginFormReturn = LoginFormState & LoginFormHandlers;
-
-export const useLoginForm = (): UseLoginFormReturn => {
+export const useLoginForm = () => {
   const [usuario, setUsuario] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Lógica de login se conectará via caso de uso / repository posteriormente
+    
+    // Limpiamos errores previos y activamos el estado de carga
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      // 1. Llamada al servicio (Ahora devuelve { token, user: { idUser, nombreUsuario... } })
+      const data = await authService.login(usuario, password);
+      
+      // 2. Guardamos en el Contexto
+      // IMPORTANTE: data.user ya es el objeto completo gracias al cambio en el backend
+      login(data.user, data.token);
+      
+      // 3. Redirección Controlada
+      // Usamos 'replace: true' para que el usuario no pueda volver al login con el botón "Atrás"
+      navigate('/', { replace: true }); 
+      
+    } catch (err: any) {
+      // Manejo de errores (el mensaje viene de nuestro handleResponse en el servicio)
+      setError(err.message || 'Error al iniciar sesión');
+      console.error('Error en el proceso de Login:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  return {
-    usuario,
-    password,
-    setUsuario,
-    setPassword,
-    handleSubmit,
+  return { 
+    usuario, 
+    password, 
+    setUsuario, 
+    setPassword, 
+    handleSubmit, 
+    error, 
+    isLoading 
   };
 };

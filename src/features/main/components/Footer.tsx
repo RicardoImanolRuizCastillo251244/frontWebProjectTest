@@ -1,5 +1,6 @@
 import React from 'react';
 import { FooterProps } from '../types/main.types';
+import logoCourtUrl from '@/assets/images/logoCourt.png';
 
 /**
  * Componente Footer - Pie de página elegante
@@ -14,8 +15,10 @@ const Footer: React.FC<FooterProps> = ({ brandName, year = new Date().getFullYea
           {/* Brand Section */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">CM</span>
+              <div className="w-10 h-10 bg-gradient-to-br to-emerald-600 rounded-lg flex items-center justify-center">
+                <span>
+                  <img src={logoCourtUrl} alt="Logo CourtMatch" />
+                </span>
               </div>
               <span className="text-white font-bold text-xl">{brandName}</span>
             </div>

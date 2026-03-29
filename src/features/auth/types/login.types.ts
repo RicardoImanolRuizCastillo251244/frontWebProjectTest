@@ -1,6 +1,8 @@
 export type LoginFormState = {
   usuario: string;
   password: string;
+  isLoading?: boolean; // Nuevo
+  error?: string | null; // Nuevo
 };
 
 export type LoginFormHandlers = {
@@ -8,3 +10,4 @@ export type LoginFormHandlers = {
   setPassword: (value: string) => void;
   handleSubmit: (e: React.FormEvent) => void;
 };
+
