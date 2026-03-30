@@ -90,13 +90,29 @@ export const getMatches = async (): Promise<MatchesApiResponse> => {
 
 // 2. GET /api/partidos/usuario/:idUser/participando → matches where the user participates
 export const getPlayerMatches = async (idUser: number): Promise<Match[]> => {
-  const payload = await apiFetchJson<
-    Match[] | PlayerMatchesResponse | MatchesEnvelope<PlayerMatchesResponse> | MatchesEnvelope<Match[]>
-  >(
-    `/partidos/usuario/${idUser}/participando`,
-    { auth: true }
-  );
-  return normalizePlayerMatchesResponse(payload);
+  try {
+    const payload = await apiFetchJson<
+      Match[] | PlayerMatchesResponse | MatchesEnvelope<PlayerMatchesResponse> | MatchesEnvelope<Match[]>
+    >(
+      `/partidos/usuario/${idUser}/participando`,
+      { auth: true }
+    );
+    return normalizePlayerMatchesResponse(payload);
+  } catch (error: any) {
+    if (error?.message === 'SESION_EXPIRADA') {
+      throw error;
+    }
+
+    // Backward-compatible fallback for environments where the new endpoint is unstable.
+    const fallbackPayload = await apiFetchJson<
+      Match[] | PlayerMatchesResponse | MatchesEnvelope<PlayerMatchesResponse> | MatchesEnvelope<Match[]>
+    >(
+      `/jugadores/${idUser}/partidos`,
+      { auth: true }
+    );
+
+    return normalizePlayerMatchesResponse(fallbackPayload);
+  }
 };
 
 // 3. POST /api/partidos/programar → create new match (auth required)

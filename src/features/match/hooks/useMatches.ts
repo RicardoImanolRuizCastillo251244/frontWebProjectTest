@@ -74,12 +74,38 @@ export const useMatches = (): UseMatchesResult => {
     try {
       setLoading(true);
       setError(null);
-      const [allMatches, playerMatches, deportes, lugares] = await Promise.all([
+      const [allMatchesResult, playerMatchesResult, deportesResult, lugaresResult] = await Promise.allSettled([
         getMatches(),
         getPlayerMatches(user.idUser),
         catalogosService.getDeportes(),
         catalogosService.getLugares(),
       ]);
+
+      if (allMatchesResult.status === 'rejected') {
+        throw allMatchesResult.reason;
+      }
+
+      if (deportesResult.status === 'rejected') {
+        throw deportesResult.reason;
+      }
+
+      if (lugaresResult.status === 'rejected') {
+        throw lugaresResult.reason;
+      }
+
+      const allMatches = allMatchesResult.value;
+      const deportes = deportesResult.value;
+      const lugares = lugaresResult.value;
+      const playerMatches = playerMatchesResult.status === 'fulfilled' ? playerMatchesResult.value : [];
+
+      if (playerMatchesResult.status === 'rejected') {
+        const reasonMessage = playerMatchesResult.reason?.message || '';
+        if (reasonMessage === 'SESION_EXPIRADA') {
+          throw playerMatchesResult.reason;
+        }
+        setError('No se pudo cargar la lista de partidos donde participas. Puedes ver los partidos disponibles.');
+      }
+
       setMatchesData(buildMatchesState(allMatches, playerMatches, deportes, lugares, user.idUser));
     } catch (err: any) {
       if (err.message === 'SESION_EXPIRADA') return;
