@@ -75,7 +75,7 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
         idDeporte: Number(formData.idDeporte),
         fecha: formData.fecha,
         hora: formData.hora,
-        idlugar: Number(formData.idLugar),
+        idLugar: Number(formData.idLugar),
         maxJugadores: Number(formData.maxJugadores)
       };
 
