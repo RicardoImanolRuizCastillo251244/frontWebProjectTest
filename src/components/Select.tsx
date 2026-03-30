@@ -1,5 +1,9 @@
 import React from 'react';
 
+const toSafeOptions = (
+  value: Array<{ label: string; value: string }> | unknown,
+): Array<{ label: string; value: string }> => (Array.isArray(value) ? value : []);
+
 export type SelectProps = {
   id: string;
   value: string;
@@ -18,7 +22,10 @@ export const Select: React.FC<SelectProps> = ({
   options,
   required = false,
   ariaLabel,
-}) => (
+}) => {
+  const safeOptions = toSafeOptions(options);
+
+  return (
   <label
     htmlFor={id}
     className="flex flex-col gap-2"
@@ -37,11 +44,12 @@ export const Select: React.FC<SelectProps> = ({
       <option value="" disabled>
         {placeholder}
       </option>
-      {options.map((option) => (
+      {safeOptions.map((option) => (
         <option key={option.value} value={option.value} className="bg-slate-950 text-white">
           {option.label}
         </option>
       ))}
     </select>
   </label>
-);
+  );
+};

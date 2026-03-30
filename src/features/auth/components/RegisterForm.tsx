@@ -4,6 +4,8 @@ import { Select } from '@/components/Select';
 import { Button } from '@/components/Button';
 import type { RegisterFormProps, Deporte, Lugar } from '../types/register.types';
 
+const toSafeArray = <T,>(value: T[] | unknown): T[] => (Array.isArray(value) ? value : []);
+
 export const RegisterForm: React.FC<RegisterFormProps> = ({
   nombre,
   correo,
@@ -22,7 +24,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   setIdLugar,
   setIdDeporteFavorito,
   handleSubmit,
-}) => (
+}) => {
+  const deportes = toSafeArray<Deporte>(listaDeportes);
+  const lugares = toSafeArray<Lugar>(listaLugares);
+
+  return (
   <form onSubmit={handleSubmit} className="flex flex-col gap-4">
     {error && (
       <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded relative">
@@ -57,7 +63,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           value={idDeporteFavorito}
           onChange={setIdDeporteFavorito}
           placeholder="Selecciona tu deporte"
-          options={listaDeportes.map((d: Deporte) => ({ 
+          options={deportes.map((d: Deporte) => ({ 
             value: d.idDeporte.toString(), 
             label: d.nombreDeporte 
           }))}
@@ -93,7 +99,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           value={idLugar}
           onChange={setIdLugar}
           placeholder="Selecciona tu ubicación"
-          options={listaLugares.map((l: Lugar) => ({ 
+          options={lugares.map((l: Lugar) => ({ 
             value: l.idLugar.toString(), 
             label: l.nombre 
           }))}
@@ -107,4 +113,5 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       {loading ? 'Cargando...' : 'Registrarse'}
     </Button>
   </form>
-);
+  );
+};

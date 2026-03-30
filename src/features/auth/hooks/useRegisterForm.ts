@@ -4,6 +4,8 @@ import { authService } from '../services/auth.service';
 import { catalogosService } from '../../../services/catalogos.service';
 import type { Deporte, Lugar } from '../types/register.types';
 
+const ensureArray = <T,>(value: T[] | unknown): T[] => (Array.isArray(value) ? value : []);
+
 export const useRegisterForm = () => {
   const navigate = useNavigate();
 
@@ -26,10 +28,13 @@ export const useRegisterForm = () => {
   useEffect(() => {
     const cargarCatalogos = async () => {
       try {
-        const [deportes, lugares] = await Promise.all([
+        const [deportesResponse, lugaresResponse] = await Promise.all([
           catalogosService.getDeportes(),
           catalogosService.getLugares(),
         ]);
+
+        const deportes = ensureArray<Deporte>(deportesResponse);
+        const lugares = ensureArray<Lugar>(lugaresResponse);
 
         setListaDeportes(deportes);
         setListaLugares(lugares);
