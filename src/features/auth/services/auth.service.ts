@@ -1,38 +1,32 @@
-const API_URL = 'http://localhost:3000/api/auth';
+import { apiFetchJson } from '@/services/api';
 
-const handleResponse = async (response: Response) => {
-  if (response.status === 401) {
-    // Si el token expiró, borramos todo rastro físico inmediatamente
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    
-    // Lanzamos error para que los Hooks (como useMatches) detengan su lógica
-    throw new Error('SESION_EXPIRADA');
-  }
+// Matches the real API response: POST /api/auth/login
+export interface LoginResponse {
+  mensaje: string;
+  token: string;
+  idUser: number;
+}
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || 'Error en el servidor');
-  }
-  return response.json();
-};
+interface RegisterPayload {
+  nombreUsuario: string;
+  correo: string;
+  contrasena: string;
+  idUbicacion: number;     // API expects idUbicacion, not idLugar
+  idDeporteFavorito: number;
+}
 
 export const authService = {
   login: async (nombreUsuario: string, contrasena: string) => {
-    const response = await fetch(`${API_URL}/login`, {
+    return apiFetchJson<LoginResponse>('/auth/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nombreUsuario, contrasena }),
     });
-    return handleResponse(response);
   },
 
-  register: async (userData: any) => {
-    const response = await fetch(`${API_URL}/registro`, {
+  register: async (userData: RegisterPayload) => {
+    return apiFetchJson('/jugadores/registro', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userData),
     });
-    return handleResponse(response);
   }
 };

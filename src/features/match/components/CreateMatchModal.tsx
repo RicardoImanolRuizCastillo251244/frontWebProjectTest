@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { createMatch } from '../services/matches.service';
+import type { MatchCreateData } from '../services/matches.service';
 import { catalogosService } from '@/services/catalogos.service';
 
 interface Deporte {
@@ -10,7 +11,7 @@ interface Deporte {
 
 interface Lugar {
   idLugar: number;
-  nombre: string; // Ojo: tu nuevo JSON de lugares usa "nombre", no "nombreLugar"
+  nombre: string;
 }
 
 interface CreateMatchModalProps {
@@ -70,13 +71,19 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
     setError(null);
 
     try {
-      await createMatch({
+      // Look up the lugar name from the selected idLugar (API expects a string name)
+      const selectedLugar = lugares.find(l => l.idLugar === Number(formData.idLugar));
+      if (!selectedLugar) throw new Error('Selecciona un lugar válido');
+
+      const payload: MatchCreateData = {
         idDeporte: Number(formData.idDeporte),
         fecha: formData.fecha,
         hora: formData.hora,
-        idLugar: Number(formData.idLugar), // Enviamos el ID numérico al backend
+        lugar: selectedLugar.nombre,
         maxJugadores: Number(formData.maxJugadores)
-      });
+      };
+
+      await createMatch(payload);
       
       onSuccess(); 
       onClose();   
@@ -148,7 +155,7 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
               <option value="" className="bg-[#0F172A]">Selecciona ubicación</option>
               {lugares.map((lug) => (
                 <option key={lug.idLugar} value={lug.idLugar} className="bg-[#0F172A]">
-                  {lug.nombre} {/* "nombre" según tu nuevo JSON de lugares */}
+                  {lug.nombre}
                 </option>
               ))}
             </select>

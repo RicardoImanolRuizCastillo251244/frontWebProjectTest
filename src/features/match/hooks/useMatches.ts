@@ -1,86 +1,95 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Match, MatchesApiResponse } from '../../../types/match.types';
-import { getMatches, joinMatch, leaveMatch } from '../services/matches.service';
+import { useAuth } from '@/features/auth/context/AuthContext';
+import { catalogosService } from '@/services/catalogos.service';
+import type { Match, MatchesState } from '../types/match.types';
+import { getMatches, getPlayerMatches, joinMatch, leaveMatch } from '../services/matches.service';
 
 export interface UseMatchesResult {
-  matchesData: MatchesApiResponse | null;
+  matchesData: MatchesState | null;
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
   handleToggleParticipation: (matchId: number, isJoined: boolean) => Promise<void>;
 }
 
+function buildMatchesState(
+  allMatches: Match[],
+  playerMatches: Match[],
+  deportes: { idDeporte: number; nombreDeporte: string }[]
+): MatchesState {
+  const playerMatchIds = new Set(playerMatches.map(m => m.idMatch));
+  const deporteMap = new Map(deportes.map(d => [d.idDeporte, d.nombreDeporte]));
+
+  const enriched = allMatches.map(m => ({
+    ...m,
+    deporte: deporteMap.get(m.idDeporte) ?? `Deporte ${m.idDeporte}`,
+    isJoined: playerMatchIds.has(m.idMatch),
+  }));
+
+  return {
+    disponibles: enriched.filter(m => !m.isJoined),
+    mis_partidos: enriched.filter(m => m.isJoined),
+  };
+}
+
 export const useMatches = (): UseMatchesResult => {
-  const [matchesData, setMatchesData] = useState<MatchesApiResponse | null>(null);
+  const { user } = useAuth();
+  const [matchesData, setMatchesData] = useState<MatchesState | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadMatches = useCallback(async () => {
+    if (!user) return;
     try {
       setLoading(true);
       setError(null);
-      const data = await getMatches();
-      setMatchesData(data);
+      const [allMatches, playerMatches, deportes] = await Promise.all([
+        getMatches(),
+        getPlayerMatches(user.idUser),
+        catalogosService.getDeportes(),
+      ]);
+      setMatchesData(buildMatchesState(allMatches, playerMatches, deportes));
     } catch (err: any) {
-      // IMPORTANTE: Sincronizado con SESION_EXPIRADA del auth.service
-      if (err.message === 'SESION_EXPIRADA') {
-        // No seteamos error en el estado para evitar parpadeos en la UI
-        // mientras la ruta nos redirige al login.
-        return; 
-      }
+      if (err.message === 'SESION_EXPIRADA') return;
       setError(err.message || 'Error al cargar los partidos');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     loadMatches();
   }, [loadMatches]);
 
   const handleToggleParticipation = async (matchId: number, isJoined: boolean) => {
-    if (!matchesData) return;
+    if (!matchesData || !user) return;
 
-    // --- PASO A: Actualización Optimista ---
     const sourceKey = isJoined ? 'mis_partidos' : 'disponibles';
     const targetKey = isJoined ? 'disponibles' : 'mis_partidos';
-    const playerDiff = isJoined ? -1 : 1;
 
     const matchToMove = matchesData[sourceKey].find(m => m.idMatch === matchId);
     if (!matchToMove) return;
 
     const previousData = { ...matchesData };
+    const updatedMatch: Match = { ...matchToMove, isJoined: !isJoined };
 
-    const updatedMatch: Match = {
-      ...matchToMove,
-      numJugadores: Math.max(0, (matchToMove.numJugadores || 0) + playerDiff),
-      isJoined: !isJoined
-    };
-
+    // Optimistic update
     setMatchesData({
       ...matchesData,
       [sourceKey]: matchesData[sourceKey].filter(m => m.idMatch !== matchId),
-      [targetKey]: [...matchesData[targetKey], updatedMatch]
+      [targetKey]: [...matchesData[targetKey], updatedMatch],
     });
 
-    // --- PASO B: Comunicación con el Backend ---
     try {
       if (isJoined) {
         await leaveMatch(matchId);
       } else {
-        await joinMatch(matchId);
+        await joinMatch({ idUser: user.idUser, idMatch: matchId });
       }
     } catch (err: any) {
-      // --- PASO C: Rollback inteligente ---
-      if (err.message === 'SESION_EXPIRADA') {
-        // Si la sesión murió, no avisamos ni hacemos rollback.
-        // Las rutas (ProtectedRoute) detectarán el disco vacío y nos sacarán.
-        return; 
-      }
-
-      console.error("Error en el servidor, revirtiendo cambios...", err);
+      if (err.message === 'SESION_EXPIRADA') return;
       setMatchesData(previousData);
-      alert("No se pudo completar la acción. Inténtalo de nuevo.");
+      setError(err.message || 'No se pudo completar la acción. Inténtalo de nuevo.');
     }
   };
 

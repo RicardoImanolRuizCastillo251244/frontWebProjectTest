@@ -2,9 +2,34 @@
  * Datos mock de partidos para desarrollo y pruebas
  */
 
-import { Match } from '../../../types/match.types';
+export interface MockMatch {
+  id: string;
+  sport: string;
+  homeTeam: {
+    id: string;
+    name: string;
+    color?: string;
+  };
+  awayTeam: {
+    id: string;
+    name: string;
+    color?: string;
+  };
+  date: string;
+  time: string;
+  location: {
+    id: string;
+    name: string;
+    address: string;
+    city: string;
+  };
+  participants: number;
+  maxParticipants: number;
+  status: 'scheduled' | 'ongoing' | 'finished';
+  description?: string;
+}
 
-export const mockMatches: Match[] = [
+export const mockMatches: MockMatch[] = [
   {
     id: '1',
     sport: 'Fútbol',
@@ -162,13 +187,13 @@ export const mockMatches: Match[] = [
  * Función para filtrar partidos por criterios
  */
 export const filterMatches = (
-  matches: Match[],
+  matches: MockMatch[],
   filters: {
     sport?: string;
-    status?: Match['status'];
+    status?: MockMatch['status'];
     city?: string;
   }
-): Match[] => {
+): MockMatch[] => {
   return matches.filter((match) => {
     if (filters.sport && match.sport !== filters.sport) return false;
     if (filters.status && match.status !== filters.status) return false;
@@ -180,6 +205,6 @@ export const filterMatches = (
 /**
  * Función para ordenar partidos por fecha
  */
-export const sortMatchesByDate = (matches: Match[]): Match[] => {
+export const sortMatchesByDate = (matches: MockMatch[]): MockMatch[] => {
   return [...matches].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 };

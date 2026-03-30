@@ -1,26 +1,34 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { isValidStoredToken } from '../utils/token';
+
+interface AuthUser {
+  idUser: number;
+  nombreUsuario: string;
+  correo?: string;
+}
 
 interface AuthContextType {
-  user: any | null;
+  user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
-  login: (userData: any, token: string) => void;
+  login: (userData: AuthUser, token: string) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const navigate = useNavigate();
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
-  const [user, setUser] = useState<any | null>(() => {
+  const [user, setUser] = useState<AuthUser | null>(() => {
     const savedUser = localStorage.getItem('user');
-    return savedUser && savedUser !== "undefined" ? JSON.parse(savedUser) : null;
+    return savedUser && savedUser !== 'undefined' ? JSON.parse(savedUser) : null;
   });
 
-  // DETERMINACIÓN REAL: No depende de estados asíncronos
-  const isAuthenticated = !!token && token !== "undefined" && !!localStorage.getItem('token');
+  const isAuthenticated = isValidStoredToken(token);
 
-  const login = (userData: any, userToken: string) => {
+  const login = (userData: AuthUser, userToken: string) => {
     localStorage.setItem('token', userToken);
     localStorage.setItem('user', JSON.stringify(userData));
     setToken(userToken);
@@ -28,24 +36,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = useCallback(() => {
-    localStorage.clear();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToken(null);
     setUser(null);
-    // Hard redirect para limpiar memoria de React y detener bucles
-    window.location.href = '/auth/login';
-  }, []);
+    navigate('/auth/login', { replace: true });
+  }, [navigate]);
 
-  // Escuchar cambios en otras pestañas o desde el service
   useEffect(() => {
-    const syncLogout = (e: StorageEvent) => {
-      if (e.key === 'token' && !e.newValue) {
+    const syncLogout = (event: StorageEvent) => {
+      if (event.key === 'token' && !event.newValue) {
         setToken(null);
         setUser(null);
       }
     };
+
+    const onUnauthorized = () => {
+      setToken(null);
+      setUser(null);
+      navigate('/auth/login', { replace: true });
+    };
+
     window.addEventListener('storage', syncLogout);
-    return () => window.removeEventListener('storage', syncLogout);
-  }, []);
+    window.addEventListener('auth:unauthorized', onUnauthorized);
+
+    return () => {
+      window.removeEventListener('storage', syncLogout);
+      window.removeEventListener('auth:unauthorized', onUnauthorized);
+    };
+  }, [navigate]);
 
   return (
     <AuthContext.Provider value={{ user, token, isAuthenticated, login, logout }}>

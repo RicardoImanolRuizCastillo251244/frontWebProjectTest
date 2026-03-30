@@ -1,11 +1,10 @@
 import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '@/features/auth/context/AuthContext';
 
 export const ProtectedRoute = () => {
-  const token = localStorage.getItem('token');
+  const { isAuthenticated } = useAuth();
   
-  // Si no hay token real, fuera. 
-  // Usamos un chequeo estricto para evitar strings "null" o "undefined"
-  if (!token || token === "undefined" || token === "null") {
+  if (!isAuthenticated) {
     return <Navigate to="/auth/login" replace />;
   }
 

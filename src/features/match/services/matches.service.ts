@@ -1,89 +1,61 @@
-const API_URL = 'https://backcourtmatchproduction-production.up.railway.app/api';
+import { apiFetchJson } from '@/services/api';
+import type { Match, MatchesApiResponse } from '../types/match.types';
 
-export interface MatchData {
+// POST /api/partidos/programar body shape
+export interface MatchCreateData {
   idDeporte: number;
   fecha: string;
   hora: string;
-  idLugar: number;
+  lugar: string;        // String name (e.g. "Cancha Sur"), NOT an idLugar
   maxJugadores: number;
 }
 
-// 1. Obtener todos los partidos
-export const getMatches = async () => {
-  const token = localStorage.getItem('token');
-  const response = await fetch(`${API_URL}/partidos`, {
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
+// POST /api/participaciones/inscribir body shape
+export interface JoinMatchData {
+  idUser: number;
+  idMatch: number;
+  nombreEquipo?: string;
+}
 
-  if (response.status === 401) {
-    localStorage.clear();
-    window.location.replace('/auth/login');
-    throw new Error('SESION_EXPIRADA');
-  }
+// Response shape for GET /api/jugadores/:id/partidos
+interface PlayerMatchesResponse {
+  jugador: string;
+  misPartidos: Match[];
+}
 
-  if (!response.ok) throw new Error('Error al obtener partidos');
-  return await response.json();
+// 1. GET /api/partidos/ → flat Match[]
+export const getMatches = async (): Promise<MatchesApiResponse> => {
+  return apiFetchJson<MatchesApiResponse>('/partidos', { auth: true });
 };
 
-// 2. Crear un nuevo partido
-export const createMatch = async (matchData: MatchData) => {
-  const token = localStorage.getItem('token');
-  const response = await fetch(`${API_URL}/partidos/programar`, {
+// 2. GET /api/jugadores/:id/partidos → the matches a specific player has joined
+export const getPlayerMatches = async (idUser: number): Promise<Match[]> => {
+  const data = await apiFetchJson<PlayerMatchesResponse>(`/jugadores/${idUser}/partidos`);
+  return data.misPartidos ?? [];
+};
+
+// 3. POST /api/partidos/programar → create new match (auth required)
+export const createMatch = async (matchData: MatchCreateData) => {
+  return apiFetchJson('/partidos/programar', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
+    auth: true,
     body: JSON.stringify(matchData)
   });
-
-  if (response.status === 401) {
-    localStorage.clear();
-    window.location.replace('/auth/login');
-    throw new Error('SESION_EXPIRADA');
-  }
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Error al crear el partido');
-  }
-  return await response.json();
 };
 
-// 3. Unirse a un partido (IMPORTANTE: Debe llamarse joinMatch)
-export const joinMatch = async (idMatch: number) => {
-  const token = localStorage.getItem('token');
-  const response = await fetch(`${API_URL}/partidos/unirse`, {
+// 4. POST /api/participaciones/inscribir → join a match (no auth per docs)
+export const joinMatch = async (joinData: JoinMatchData) => {
+  return apiFetchJson('/participaciones/inscribir', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({ idMatch })
+    body: JSON.stringify({
+      idUser: joinData.idUser,
+      idMatch: joinData.idMatch,
+      nombreEquipo: joinData.nombreEquipo ?? ''
+    })
   });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'No se pudo unir al partido');
-  }
-  return await response.json();
 };
 
-// 4. Salir de un partido (IMPORTANTE: Debe llamarse leaveMatch)
-export const leaveMatch = async (idMatch: number) => {
-  const token = localStorage.getItem('token');
-  const response = await fetch(`${API_URL}/partidos/salir`, {
-    method: 'DELETE', // O POST, según lo tengas en tu backend
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({ idMatch })
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'No se pudo salir del partido');
-  }
-  return await response.json();
+// 5. Leave match — endpoint not yet documented; throws a friendly error
+export const leaveMatch = async (_idMatch: number): Promise<void> => {
+  throw new Error('Salir de un partido no está disponible todavía.');
 };

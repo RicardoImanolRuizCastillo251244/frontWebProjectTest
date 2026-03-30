@@ -95,7 +95,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           placeholder="Selecciona tu ubicación"
           options={listaLugares.map((l: Lugar) => ({ 
             value: l.idLugar.toString(), 
-            label: l.nombreLugar 
+            label: l.nombre 
           }))}
           ariaLabel="Ubicación"
           required

@@ -1,33 +1,26 @@
 /**
- * Tipos e interfaces sincronizados con Sequelize (Base de Datos)
+ * Shape returned by the backend API (GET /api/partidos/)
  */
-
 export interface Match {
-  // Identificadores de Sequelize
-  idMatch: number;      
+  idMatch: number;
   idDeporte: number;
-  
-  // Datos del encuentro
-  deporte?: string;      // Viene de la tabla 'deportes' vía JOIN
-  fecha: string;        // DATEONLY (YYYY-MM-DD)
-  hora: string;         // TIME (HH:mm:ss)
-  lugar: string;        // STRING
-  
-  // Jugadores y Cupos
-  numJugadores: number;  // Calculado con COUNT en participaciones
-  maxJugadores: number;  // INTEGER
-  
-  // Información extra
-  descripcion: string | null;
-  
-  // Estado de UI (Calculado en el service o backend)
-  isJoined?: boolean;    
+  deporte?: string;       // Enriched on the frontend from the sports catalog
+  fecha: string;          // YYYY-MM-DD
+  hora: string;           // HH:mm:ss
+  lugar: string;
+  maxJugadores: number;
+  numJugadores?: number;  // Not returned by API; defaults to 0 in UI
+  descripcion?: string | null;
+  isJoined?: boolean;     // Computed by the hook
 }
 
-export interface MatchesApiResponse {
+export interface MatchesState {
   disponibles: Match[];
   mis_partidos: Match[];
 }
+
+/** Raw flat array returned by GET /api/partidos/ */
+export type MatchesApiResponse = Match[];
 
 export interface Participacion {
   idParticipacion: number;

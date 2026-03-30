@@ -8,8 +8,11 @@ import Header from "@/features/main/components/Header";
 import { ProfilePage } from "@/features/profile";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PublicRoute } from "./PublicRoute";
+import { useAuth } from "@/features/auth/context/AuthContext";
 
 export const AppRoutes: React.FC = () => {
+  const { isAuthenticated } = useAuth();
+
   return (
     <Routes>
       {/* RUTAS PÚBLICAS: Si estoy logueado, me saca de aquí */}
@@ -49,7 +52,7 @@ export const AppRoutes: React.FC = () => {
         path="*"
         element={
           <Navigate
-            to={localStorage.getItem("token") ? "/" : "/auth/login"}
+            to={isAuthenticated ? "/" : "/auth/login"}
             replace
           />
         }

@@ -1,38 +1,35 @@
 /**
- * Definición exacta del modelo Partido en Sequelize
+ * Shape returned by GET /api/partidos/ and GET /api/jugadores/:id/partidos
  */
 export interface Match {
-  idMatch: number;        // Primary Key (idMatch)
-  idDeporte: number;      // Foreign Key (idDeporte)
-  deporte?: string;       // Nombre del deporte (proviene de un JOIN en el back)
-  fecha: string;          // Formato DATEONLY (YYYY-MM-DD)
-  hora: string;           // Formato TIME (HH:mm:ss)
-  lugar: string;          // STRING
-  maxJugadores: number;   // INTEGER
-  numJugadores: number;   // Calculado en el back (COUNT de participaciones)
-  descripcion: string | null; // TEXT
-  
-  // Propiedad virtual para la lógica del Frontend
-  isJoined?: boolean;     // Indica si el usuario actual ya está inscrito
+  idMatch: number;
+  idDeporte: number;
+  deporte?: string;       // Enriched by the hook from the sports catalog
+  fecha: string;          // YYYY-MM-DD
+  hora: string;           // HH:mm:ss
+  lugar: string;
+  maxJugadores: number;
+  numJugadores?: number;  // Not returned by API; kept for UI display (shows 0 if absent)
+  descripcion?: string | null; // Optional; not always present in API response
+  isJoined?: boolean;     // Computed by the hook
 }
 
 /**
- * Interfaz para la respuesta del servicio de partidos
- * Divide los datos para las dos pestañas de la UI
+ * What the hook exposes to the UI (two tabs)
  */
-export interface MatchesApiResponse {
+export interface MatchesState {
   disponibles: Match[];
   mis_partidos: Match[];
 }
 
 /**
- * Definición del modelo Participacion en Sequelize
- * (Opcional, por si necesitas tipar las inscripciones)
+ * Raw API response type for GET /api/partidos/ → flat array
  */
+export type MatchesApiResponse = Match[];
+
 export interface Participacion {
   idParticipacion: number;
   idUser: number;
   idMatch: number;
   nombreEquipo?: string | null;
-  estado: 'pendiente' | 'aceptada' | 'rechazada';
 }

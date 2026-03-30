@@ -5,7 +5,7 @@ export interface Deporte {
 
 export interface Lugar {
   idLugar: number;
-  nombreLugar: string;
+  nombre: string;
 }
 
 export interface RegisterFormState {

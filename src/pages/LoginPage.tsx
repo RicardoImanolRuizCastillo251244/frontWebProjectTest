@@ -6,7 +6,7 @@ import { useLoginForm } from '@/features/auth/hooks/useLoginForm';
 import logoCourtUrl from '@/assets/images/logoCourt.png';
 
 export const LoginPage: React.FC = () => {
-  const { usuario, password, setUsuario, setPassword, handleSubmit } = useLoginForm();
+  const { usuario, password, setUsuario, setPassword, handleSubmit, error, isLoading } = useLoginForm();
 
   return (
     <div className="flex flex-col items-center gap-0 w-full max-w-md">
@@ -21,6 +21,8 @@ export const LoginPage: React.FC = () => {
           setUsuario={setUsuario}
           setPassword={setPassword}
           handleSubmit={handleSubmit}
+          error={error}
+          isLoading={isLoading}
         />
       </BipartiteCard>
       <div className="mt-6 w-full h-0.5 bg-white/40" aria-hidden />

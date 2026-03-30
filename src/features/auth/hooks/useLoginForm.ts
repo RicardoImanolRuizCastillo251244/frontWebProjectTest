@@ -20,12 +20,11 @@ export const useLoginForm = () => {
     setIsLoading(true);
 
     try {
-      // 1. Llamada al servicio (Ahora devuelve { token, user: { idUser, nombreUsuario... } })
+      // Real API returns { mensaje, token, idUser }
       const data = await authService.login(usuario, password);
       
-      // 2. Guardamos en el Contexto
-      // IMPORTANTE: data.user ya es el objeto completo gracias al cambio en el backend
-      login(data.user, data.token);
+      // Construct AuthUser from login response + form input (API doesn't return nombreUsuario on login)
+      login({ idUser: data.idUser, nombreUsuario: usuario }, data.token);
       
       // 3. Redirección Controlada
       // Usamos 'replace: true' para que el usuario no pueda volver al login con el botón "Atrás"

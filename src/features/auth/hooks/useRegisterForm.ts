@@ -26,12 +26,16 @@ export const useRegisterForm = () => {
   useEffect(() => {
     const cargarCatalogos = async () => {
       try {
-        const data = await catalogosService.getRegistroData();
-        setListaDeportes(data.deportes);
-        setListaLugares(data.lugares);
+        const [deportes, lugares] = await Promise.all([
+          catalogosService.getDeportes(),
+          catalogosService.getLugares(),
+        ]);
+
+        setListaDeportes(deportes);
+        setListaLugares(lugares);
         
-        if (data.deportes.length > 0) setIdDeporteFavorito(data.deportes[0].idDeporte.toString());
-        if (data.lugares.length > 0) setIdLugar(data.lugares[0].idLugar.toString());
+        if (deportes.length > 0) setIdDeporteFavorito(deportes[0].idDeporte.toString());
+        if (lugares.length > 0) setIdLugar(lugares[0].idLugar.toString());
       } catch (err) {
         setError('No se pudieron cargar los datos del servidor');
       }
@@ -54,7 +58,7 @@ export const useRegisterForm = () => {
         nombreUsuario: nombre,
         correo: correo,
         contrasena: contrasena,
-        idLugar: Number(idLugar),
+        idUbicacion: Number(idLugar),       // API expects idUbicacion
         idDeporteFavorito: Number(idDeporteFavorito)
       };
 

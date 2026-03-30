@@ -1,21 +1,24 @@
-// src/services/catalogos.service.ts
-const API_URL = 'https://backcourtmatchproduction-production.up.railway.app/api';
+import { apiFetchJson } from './api';
+
+// GET /api/deportes/ → returns Deporte[] directly
+type Deporte = {
+  idDeporte: number;
+  nombreDeporte: string;
+};
+
+// GET /api/lugares/listar → returns { idLugar, nombre, ... }[]
+export type Lugar = {
+  idLugar: number;
+  nombre: string;
+  ubicacion?: string;
+};
 
 export const catalogosService = {
-  // GET /api/deportes -> Responde con { data: [...] }
-  getDeportes: async () => {
-    const response = await fetch(`${API_URL}/deportes`);
-    if (!response.ok) throw new Error('Error al obtener deportes');
-    const json = await response.json();
-    console.log(json)
-    return json.data; // Extraemos el array de la propiedad 'data'
+  getDeportes: async (): Promise<Deporte[]> => {
+    return apiFetchJson<Deporte[]>('/deportes');
   },
 
-  // GET /api/lugares/listar -> Responde con [...]
-  getLugares: async () => {
-    const response = await fetch(`${API_URL}/lugares/listar`);
-    if (!response.ok) throw new Error('Error al obtener lugares');
-    console.log(response.json())
-    return await response.json(); // Array directo
+  getLugares: async (): Promise<Lugar[]> => {
+    return apiFetchJson<Lugar[]>('/lugares/listar');
   }
 };

@@ -12,8 +12,13 @@ import LogoutButton from '../components/LogoutButton';
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(() => {
-    if (typeof user === 'string') return { id: 'temp', username: user, email: '...', stats: { played: 0, won: 0, lost: 0 }};
-    return user as UserProfile;
+    if (!user) return null;
+    return {
+      id: String(user.idUser),
+      username: user.nombreUsuario,
+      email: user.correo || '...',
+      stats: { played: 0, won: 0, lost: 0 },
+    };
   });
 
   useEffect(() => {
