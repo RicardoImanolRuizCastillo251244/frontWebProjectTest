@@ -2,9 +2,17 @@ import { apiFetchJson } from '@/services/api';
 
 // Matches the real API response: POST /api/auth/login
 export interface LoginResponse {
-  mensaje: string;
-  token: string;
-  idUser: number;
+  mensaje?: string;
+  token?: string;
+  accessToken?: string;
+  idUser?: number;
+  id?: number;
+  nombreUsuario?: string;
+  user?: {
+    idUser?: number;
+    id?: number;
+    nombreUsuario?: string;
+  };
 }
 
 interface RegisterPayload {
