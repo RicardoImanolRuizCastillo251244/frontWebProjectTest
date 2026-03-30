@@ -15,6 +15,9 @@ export const AppRoutes: React.FC = () => {
 
   return (
     <Routes>
+      <Route path="/login" element={<Navigate to="/auth/login" replace />} />
+      <Route path="/registro" element={<Navigate to="/auth/registro" replace />} />
+
       {/* RUTAS PÚBLICAS: Si estoy logueado, me saca de aquí */}
       <Route element={<PublicRoute />}>
         <Route

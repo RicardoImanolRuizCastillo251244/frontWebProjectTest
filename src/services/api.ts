@@ -3,6 +3,12 @@ export const API_BASE_URL = (
   'https://backcourtmatchproduction-production.up.railway.app/api'
 ).replace(/\/$/, '');
 
+type ApiErrorShape = {
+  error?: string;
+  message?: string;
+  errors?: Array<{ field?: string; message?: string }>;
+};
+
 const clearAuthStorage = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
@@ -45,8 +51,9 @@ export const apiFetchJson = async <T>(
   }
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({} as { error?: string; message?: string }));
-    throw new Error(errorData.error || errorData.message || 'Error en el servidor');
+    const errorData = await response.json().catch(() => ({} as ApiErrorShape));
+    const validationMessage = errorData.errors?.find((e: { field?: string; message?: string }) => e.message)?.message;
+    throw new Error(validationMessage || errorData.error || errorData.message || 'Error en el servidor');
   }
 
   if (response.status === 204) {

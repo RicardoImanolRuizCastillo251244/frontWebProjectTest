@@ -16,10 +16,10 @@ interface RegisterPayload {
 }
 
 export const authService = {
-  login: async (nombreUsuario: string, contrasena: string) => {
+  login: async (correo: string, contrasena: string) => {
     return apiFetchJson<LoginResponse>('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ nombreUsuario, contrasena }),
+      body: JSON.stringify({ correo, contrasena }),
     });
   },
 
