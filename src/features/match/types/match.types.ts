@@ -1,11 +1,19 @@
 /**
  * Shape returned by GET /api/partidos/ and GET /api/jugadores/:id/partidos
  */
+export interface MatchCreator {
+  idUser: number;
+  nombreUsuario?: string;
+  correo?: string;
+}
+
 export interface Match {
   idMatch: number;
   idDeporte: number;
   idlugar?: number;
   idLugar?: number;
+  idCreador?: number;
+  creador?: MatchCreator | null;
   deporte?: string;       // Enriched by the hook from the sports catalog
   fecha: string;          // YYYY-MM-DD
   hora: string;           // HH:mm:ss

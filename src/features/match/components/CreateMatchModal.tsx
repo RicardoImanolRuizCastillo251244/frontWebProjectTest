@@ -25,8 +25,9 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
     idDeporte: '',
     fecha: '',
     hora: '',
-    idLugar: '', // Cambiado de 'lugar' a 'idLugar' para coincidir con el backend
-    maxJugadores: ''
+    idLugar: '',
+    maxJugadores: '',
+    equipoCreador: 'A' as 'A' | 'B'
   });
 
   const [deportes, setDeportes] = useState<Deporte[]>([]);
@@ -76,14 +77,15 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
         fecha: formData.fecha,
         hora: formData.hora,
         idLugar: Number(formData.idLugar),
-        maxJugadores: Number(formData.maxJugadores)
+        maxJugadores: Number(formData.maxJugadores),
+        equipoCreador: formData.equipoCreador
       };
 
       await createMatch(payload);
       
       onSuccess(); 
       onClose();   
-      setFormData({ idDeporte: '', fecha: '', hora: '', idLugar: '', maxJugadores: '' });
+      setFormData({ idDeporte: '', fecha: '', hora: '', idLugar: '', maxJugadores: '', equipoCreador: 'A' });
     } catch (err: any) {
       if (err.message !== 'SESION_EXPIRADA') {
         setError(err.message || 'Error al crear el partido');
@@ -165,6 +167,20 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
               className="bg-transparent border border-white/20 p-3 text-white outline-none focus:border-white" 
               required
             />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-white/40 text-[10px] font-bold uppercase">Equipo del creador</label>
+            <select
+              name="equipoCreador"
+              value={formData.equipoCreador}
+              onChange={handleChange}
+              className="bg-transparent border border-white/20 p-3 text-white outline-none focus:border-white cursor-pointer"
+              required
+            >
+              <option value="A" className="bg-[#0F172A]">Equipo A</option>
+              <option value="B" className="bg-[#0F172A]">Equipo B</option>
+            </select>
           </div>
           
           <button 

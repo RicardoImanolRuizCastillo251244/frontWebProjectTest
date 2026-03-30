@@ -1,11 +1,19 @@
 /**
  * Shape returned by the backend API (GET /api/partidos/)
  */
+export interface MatchCreator {
+  idUser: number;
+  nombreUsuario?: string;
+  correo?: string;
+}
+
 export interface Match {
   idMatch: number;
   idDeporte: number;
   idlugar?: number;
   idLugar?: number;
+  idCreador?: number;
+  creador?: MatchCreator | null;
   deporte?: string;       // Enriched on the frontend from the sports catalog
   fecha: string;          // YYYY-MM-DD
   hora: string;           // HH:mm:ss

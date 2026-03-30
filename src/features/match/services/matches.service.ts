@@ -8,6 +8,7 @@ export interface MatchCreateData {
   hora: string;
   idLugar: number;
   maxJugadores: number;
+  equipoCreador: 'A' | 'B';
 }
 
 // POST /api/participaciones/inscribir body shape

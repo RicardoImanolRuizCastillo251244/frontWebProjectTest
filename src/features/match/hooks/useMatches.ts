@@ -16,23 +16,50 @@ function buildMatchesState(
   allMatches: Match[],
   playerMatches: Match[],
   deportes: { idDeporte: number; nombreDeporte: string }[],
-  lugares: { idLugar: number; nombre: string }[]
+  lugares: { idLugar: number; nombre: string }[],
+  currentUserId: number
 ): MatchesState {
-  const playerMatchIds = new Set(playerMatches.map(m => m.idMatch));
   const deporteMap = new Map(deportes.map(d => [d.idDeporte, d.nombreDeporte]));
   const lugarMap = new Map(lugares.map(l => [l.idLugar, l.nombre]));
+  const normalizeMatch = (match: Match): Match => ({
+    ...match,
+    idlugar: match.idlugar ?? match.idLugar,
+    idCreador: match.idCreador ?? match.creador?.idUser,
+    lugar: match.lugar ?? lugarMap.get(match.idlugar ?? match.idLugar ?? -1) ?? 'Lugar desconocido',
+    deporte: deporteMap.get(match.idDeporte) ?? `Deporte ${match.idDeporte}`,
+  });
 
-  const enriched = allMatches.map(m => ({
-    ...m,
-    idlugar: m.idlugar ?? m.idLugar,
-    lugar: m.lugar ?? lugarMap.get(m.idlugar ?? m.idLugar ?? -1) ?? 'Lugar desconocido',
-    deporte: deporteMap.get(m.idDeporte) ?? `Deporte ${m.idDeporte}`,
-    isJoined: playerMatchIds.has(m.idMatch),
-  }));
+  const normalizedPlayerMatches = playerMatches.map(normalizeMatch);
+  const playerMatchIds = new Set(normalizedPlayerMatches.map(match => match.idMatch));
+
+  const enriched = allMatches.map(match => {
+    const normalizedMatch = normalizeMatch(match);
+    const isCreatedByUser = normalizedMatch.idCreador === currentUserId;
+
+    return {
+      ...normalizedMatch,
+      isJoined: playerMatchIds.has(normalizedMatch.idMatch) || isCreatedByUser,
+    };
+  });
+
+  const myMatchesMap = new Map<number, Match>();
+
+  normalizedPlayerMatches.forEach(match => {
+    myMatchesMap.set(match.idMatch, {
+      ...match,
+      isJoined: true,
+    });
+  });
+
+  enriched.forEach(match => {
+    if (match.isJoined) {
+      myMatchesMap.set(match.idMatch, match);
+    }
+  });
 
   return {
-    disponibles: enriched.filter(m => !m.isJoined),
-    mis_partidos: enriched.filter(m => m.isJoined),
+    disponibles: enriched.filter(match => !match.isJoined),
+    mis_partidos: Array.from(myMatchesMap.values()),
   };
 }
 
@@ -53,7 +80,7 @@ export const useMatches = (): UseMatchesResult => {
         catalogosService.getDeportes(),
         catalogosService.getLugares(),
       ]);
-      setMatchesData(buildMatchesState(allMatches, playerMatches, deportes, lugares));
+      setMatchesData(buildMatchesState(allMatches, playerMatches, deportes, lugares, user.idUser));
     } catch (err: any) {
       if (err.message === 'SESION_EXPIRADA') return;
       setError(err.message || 'Error al cargar los partidos');
