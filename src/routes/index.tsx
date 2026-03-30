@@ -45,7 +45,8 @@ export const AppRoutes: React.FC = () => {
             </>
           }
         >
-          <Route path="/" element={<MainPage />} />
+            <Route path="/" element={<Navigate to="/mainpage" replace />} />
+            <Route path="/mainpage" element={<MainPage />} />
           <Route path="/perfil" element={<ProfilePage />} />
         </Route>
       </Route>
@@ -55,7 +56,7 @@ export const AppRoutes: React.FC = () => {
         path="*"
         element={
           <Navigate
-            to={isAuthenticated ? "/" : "/auth/login"}
+            to={isAuthenticated ? "/mainpage" : "/auth/login"}
             replace
           />
         }

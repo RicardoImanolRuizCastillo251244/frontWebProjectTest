@@ -27,8 +27,8 @@ export const useLoginForm = () => {
       login({ idUser: data.idUser, nombreUsuario: usuario }, data.token);
       
       // 3. Redirección Controlada
-      // Usamos 'replace: true' para que el usuario no pueda volver al login con el botón "Atrás"
-      navigate('/', { replace: true }); 
+      // Siempre llevamos al usuario a la página principal
+      navigate('/mainpage', { replace: true }); 
       
     } catch (err: any) {
       // Manejo de errores (el mensaje viene de nuestro handleResponse en el servicio)
