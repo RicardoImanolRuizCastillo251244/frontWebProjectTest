@@ -103,7 +103,7 @@ const MatchesVisualization: React.FC = () => {
         )}
 
         {/* --- GRID DE PARTIDOS --- */}
-        {!loading && !error && (
+        {!loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
             {currentMatches.length === 0 ? (
               <div className="col-span-full py-20 flex flex-col items-center opacity-40">

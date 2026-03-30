@@ -32,6 +32,18 @@ interface PlayerMatchesResponse {
   misPartidos: Match[];
 }
 
+interface MatchParticipacion {
+  idParticipacion: number;
+  idUser: number;
+  idMatch: number;
+  nombreEquipo?: string | null;
+}
+
+interface MatchParticipacionesResponse {
+  idMatch: number;
+  participaciones: MatchParticipacion[];
+}
+
 const normalizeMatchesArray = (
   payload: Match[] | MatchesEnvelope<Match[]>
 ): Match[] => {
@@ -136,8 +148,21 @@ export const joinMatch = async (joinData: JoinMatchData) => {
 };
 
 // 5. DELETE /api/partidos/:idMatch/participantes/:idParticipante → leave match (self) or remove participant
-export const leaveMatch = async (idMatch: number, idParticipante: number): Promise<void> => {
-  await apiFetchJson(`/partidos/${idMatch}/participantes/${idParticipante}`, {
+export const leaveMatch = async (idMatch: number, idUser: number): Promise<void> => {
+  const payload = await apiFetchJson<MatchesEnvelope<MatchParticipacionesResponse>>(
+    `/participaciones/${idMatch}`,
+    {
+      auth: true,
+    }
+  );
+
+  const participation = payload.data?.participaciones?.find((item) => item.idUser === idUser);
+
+  if (!participation) {
+    throw new Error('No se encontró tu participación en este partido.');
+  }
+
+  await apiFetchJson(`/participaciones/${participation.idParticipacion}`, {
     method: 'DELETE',
     auth: true,
   });
