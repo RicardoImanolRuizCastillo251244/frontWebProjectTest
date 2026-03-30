@@ -1,6 +1,15 @@
 import { apiFetchJson } from '@/services/api';
 import type { Match, MatchesApiResponse } from '../types/match.types';
 
+type MatchesEnvelope<T> = {
+  ok?: boolean;
+  statusCode?: number;
+  message?: string;
+  data?: T;
+  partidos?: Match[];
+  misPartidos?: Match[];
+};
+
 // POST /api/partidos/programar body shape
 export interface MatchCreateData {
   idDeporte: number;
@@ -24,15 +33,61 @@ interface PlayerMatchesResponse {
   misPartidos: Match[];
 }
 
+const normalizeMatchesArray = (
+  payload: Match[] | MatchesEnvelope<Match[]>
+): Match[] => {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  if (!payload || typeof payload !== 'object') {
+    return [];
+  }
+
+  if (Array.isArray(payload.data)) {
+    return payload.data;
+  }
+
+  if (Array.isArray(payload.partidos)) {
+    return payload.partidos;
+  }
+
+  if (Array.isArray(payload.misPartidos)) {
+    return payload.misPartidos;
+  }
+
+  return [];
+};
+
+const normalizePlayerMatchesResponse = (
+  payload: PlayerMatchesResponse | MatchesEnvelope<PlayerMatchesResponse>
+): Match[] => {
+  if (!payload || typeof payload !== 'object') {
+    return [];
+  }
+
+  if ('data' in payload && payload.data) {
+    return normalizePlayerMatchesResponse(payload.data);
+  }
+
+  return Array.isArray(payload.misPartidos) ? payload.misPartidos : [];
+};
+
 // 1. GET /api/partidos/ → flat Match[]
 export const getMatches = async (): Promise<MatchesApiResponse> => {
-  return apiFetchJson<MatchesApiResponse>('/partidos', { auth: true });
+  const payload = await apiFetchJson<MatchesApiResponse | MatchesEnvelope<Match[]>>('/partidos', {
+    auth: true
+  });
+  return normalizeMatchesArray(payload);
 };
 
 // 2. GET /api/jugadores/:id/partidos → the matches a specific player has joined
 export const getPlayerMatches = async (idUser: number): Promise<Match[]> => {
-  const data = await apiFetchJson<PlayerMatchesResponse>(`/jugadores/${idUser}/partidos`);
-  return data.misPartidos ?? [];
+  const payload = await apiFetchJson<PlayerMatchesResponse | MatchesEnvelope<PlayerMatchesResponse>>(
+    `/jugadores/${idUser}/partidos`,
+    { auth: true }
+  );
+  return normalizePlayerMatchesResponse(payload);
 };
 
 // 3. POST /api/partidos/programar → create new match (auth required)
