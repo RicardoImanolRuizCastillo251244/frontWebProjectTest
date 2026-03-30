@@ -30,9 +30,31 @@ export const useLoginForm = () => {
       // Real API returns { mensaje, token, idUser }
       const data = await authService.login(usuario, password);
 
-      const token = data.token ?? data.accessToken ?? null;
-      const idUser = data.idUser ?? data.user?.idUser ?? data.id ?? data.user?.id;
-      const nombreUsuario = data.nombreUsuario ?? data.user?.nombreUsuario ?? usuario;
+      const token =
+        data.session?.token ??
+        data.data?.token ??
+        data.token ??
+        data.accessToken ??
+        null;
+
+      const idUser =
+        data.session?.user?.idUser ??
+        data.data?.idUser ??
+        data.idUser ??
+        data.user?.idUser ??
+        data.id ??
+        data.user?.id;
+
+      const nombreUsuario =
+        data.session?.user?.nombreUsuario ??
+        data.data?.nombreUsuario ??
+        data.nombreUsuario ??
+        data.user?.nombreUsuario ??
+        data.session?.user?.correo ??
+        data.data?.correo ??
+        data.correo ??
+        data.user?.correo ??
+        usuario;
 
       if (!isValidStoredToken(token) || typeof idUser !== 'number') {
         throw new Error('No se recibió una sesión válida del servidor');
