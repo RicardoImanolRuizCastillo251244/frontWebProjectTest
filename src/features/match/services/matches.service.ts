@@ -22,9 +22,8 @@ export interface MatchCreateData {
 
 // POST /api/participaciones/inscribir body shape
 export interface JoinMatchData {
-  idUser: number;
   idMatch: number;
-  nombreEquipo?: string;
+  equipo?: 'A' | 'B';
 }
 
 // Response shape for GET /api/jugadores/:id/partidos
@@ -60,14 +59,22 @@ const normalizeMatchesArray = (
 };
 
 const normalizePlayerMatchesResponse = (
-  payload: PlayerMatchesResponse | MatchesEnvelope<PlayerMatchesResponse>
+  payload:
+    | Match[]
+    | PlayerMatchesResponse
+    | MatchesEnvelope<PlayerMatchesResponse>
+    | MatchesEnvelope<Match[]>
 ): Match[] => {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
   if (!payload || typeof payload !== 'object') {
     return [];
   }
 
   if ('data' in payload && payload.data) {
-    return normalizePlayerMatchesResponse(payload.data);
+    return normalizePlayerMatchesResponse(payload.data as Match[] | PlayerMatchesResponse);
   }
 
   return Array.isArray(payload.misPartidos) ? payload.misPartidos : [];
@@ -81,10 +88,12 @@ export const getMatches = async (): Promise<MatchesApiResponse> => {
   return normalizeMatchesArray(payload);
 };
 
-// 2. GET /api/jugadores/:id/partidos → the matches a specific player has joined
+// 2. GET /api/partidos/usuario/:idUser/participando → matches where the user participates
 export const getPlayerMatches = async (idUser: number): Promise<Match[]> => {
-  const payload = await apiFetchJson<PlayerMatchesResponse | MatchesEnvelope<PlayerMatchesResponse>>(
-    `/jugadores/${idUser}/partidos`,
+  const payload = await apiFetchJson<
+    Match[] | PlayerMatchesResponse | MatchesEnvelope<PlayerMatchesResponse> | MatchesEnvelope<Match[]>
+  >(
+    `/partidos/usuario/${idUser}/participando`,
     { auth: true }
   );
   return normalizePlayerMatchesResponse(payload);
@@ -99,19 +108,32 @@ export const createMatch = async (matchData: MatchCreateData) => {
   });
 };
 
-// 4. POST /api/participaciones/inscribir → join a match (no auth per docs)
+// 4. POST /api/partidos/:idMatch/unirse → join a match (auth required)
 export const joinMatch = async (joinData: JoinMatchData) => {
-  return apiFetchJson('/participaciones/inscribir', {
+  return apiFetchJson(`/partidos/${joinData.idMatch}/unirse`, {
     method: 'POST',
+    auth: true,
     body: JSON.stringify({
-      idUser: joinData.idUser,
-      idMatch: joinData.idMatch,
-      nombreEquipo: joinData.nombreEquipo ?? ''
+      equipo: joinData.equipo ?? 'A'
     })
   });
 };
 
-// 5. Leave match — endpoint not yet documented; throws a friendly error
-export const leaveMatch = async (_idMatch: number): Promise<void> => {
-  throw new Error('Salir de un partido no está disponible todavía.');
+// 5. DELETE /api/partidos/:idMatch/participantes/:idParticipante → leave match (self) or remove participant
+export const leaveMatch = async (idMatch: number, idParticipante: number): Promise<void> => {
+  await apiFetchJson(`/partidos/${idMatch}/participantes/${idParticipante}`, {
+    method: 'DELETE',
+    auth: true,
+  });
+};
+
+// 6. DELETE /api/partidos/:idMatch → cancel match (creator only)
+export const cancelMatch = async (idMatch: number, motivoCancelacion?: string): Promise<void> => {
+  await apiFetchJson(`/partidos/${idMatch}`, {
+    method: 'DELETE',
+    auth: true,
+    body: JSON.stringify({
+      motivoCancelacion: motivoCancelacion ?? 'Cancelado desde la app',
+    }),
+  });
 };

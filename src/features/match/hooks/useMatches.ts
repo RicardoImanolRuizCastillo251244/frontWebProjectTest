@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { catalogosService } from '@/services/catalogos.service';
 import type { Match, MatchesState } from '../types/match.types';
-import { getMatches, getPlayerMatches, joinMatch, leaveMatch } from '../services/matches.service';
+import { cancelMatch, getMatches, getPlayerMatches, joinMatch, leaveMatch } from '../services/matches.service';
 
 export interface UseMatchesResult {
   matchesData: MatchesState | null;
@@ -104,19 +104,31 @@ export const useMatches = (): UseMatchesResult => {
 
     const previousData = { ...matchesData };
     const updatedMatch: Match = { ...matchToMove, isJoined: !isJoined };
+    const isCreator = matchToMove.idCreador === user.idUser;
 
-    // Optimistic update
-    setMatchesData({
-      ...matchesData,
-      [sourceKey]: matchesData[sourceKey].filter(m => m.idMatch !== matchId),
-      [targetKey]: [...matchesData[targetKey], updatedMatch],
-    });
+    // Optimistic update: creator cancellation removes the match from UI, participant leave moves it back to available.
+    if (isJoined && isCreator) {
+      setMatchesData({
+        disponibles: matchesData.disponibles.filter(m => m.idMatch !== matchId),
+        mis_partidos: matchesData.mis_partidos.filter(m => m.idMatch !== matchId),
+      });
+    } else {
+      setMatchesData({
+        ...matchesData,
+        [sourceKey]: matchesData[sourceKey].filter(m => m.idMatch !== matchId),
+        [targetKey]: [...matchesData[targetKey], updatedMatch],
+      });
+    }
 
     try {
       if (isJoined) {
-        await leaveMatch(matchId);
+        if (isCreator) {
+          await cancelMatch(matchId);
+        } else {
+          await leaveMatch(matchId, user.idUser);
+        }
       } else {
-        await joinMatch({ idUser: user.idUser, idMatch: matchId });
+        await joinMatch({ idMatch: matchId });
       }
     } catch (err: any) {
       if (err.message === 'SESION_EXPIRADA') return;

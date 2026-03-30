@@ -6,7 +6,7 @@ import MatchCard from "./MatchCard";
 import MatchModal from "./MatchModal";
 
 const MatchesVisualization: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [activeTab, setActiveTab] = useState<"disponibles" | "mis_partidos">("disponibles");
 
   // 1. Hook de lógica de partidos (Trae datos, loading, error y funciones de acción)
@@ -117,7 +117,13 @@ const MatchesVisualization: React.FC = () => {
                 <MatchCard
                   key={match.idMatch}
                   match={match}
-                  actionText={activeTab === "disponibles" ? "Unirse" : "Ver / Cancelar"}
+                  actionText={
+                    activeTab === "disponibles"
+                      ? "Unirse"
+                      : match.idCreador === user?.idUser
+                        ? "Ver / Gestionar"
+                        : "Ver / Cancelar"
+                  }
                   onActionClick={handleMatchAction}
                 />
               ))
@@ -130,6 +136,7 @@ const MatchesVisualization: React.FC = () => {
           isOpen={isModalOpen}
           match={selectedMatch}
           isJoined={activeTab === "mis_partidos"}
+          isCreator={selectedMatch?.idCreador === user?.idUser}
           onClose={() => {
             setIsModalOpen(false);
             setSelectedMatch(null);

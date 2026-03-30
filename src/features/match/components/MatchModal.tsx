@@ -6,12 +6,19 @@ interface MatchModalProps {
   isOpen: boolean;
   match: Match | null;
   onClose: () => void;
-  // 2. Cambiamos a number para que coincida con idMatch (Sequelize)
   onConfirmJoin: (matchId: number) => void; 
   isJoined: boolean;
+  isCreator?: boolean;
 }
 
-const MatchModal: React.FC<MatchModalProps> = ({ isOpen, match, onClose, onConfirmJoin, isJoined }) => {
+const MatchModal: React.FC<MatchModalProps> = ({
+  isOpen,
+  match,
+  onClose,
+  onConfirmJoin,
+  isJoined,
+  isCreator = false,
+}) => {
   // Guard clause para evitar errores si no hay match seleccionado
   if (!isOpen || !match) return null;
 
@@ -61,15 +68,13 @@ const MatchModal: React.FC<MatchModalProps> = ({ isOpen, match, onClose, onConfi
         <div className="p-6 pt-2 bg-black/20">
           {isJoined ? (
             <button 
-              // 3. CORRECCIÓN: Usamos match.idMatch y quitamos el .toString()
               onClick={() => onConfirmJoin(match.idMatch)}
               className="w-full bg-transparent border border-red-500/50 text-red-500 py-4 rounded-xl text-xs font-black uppercase tracking-[0.15em] hover:bg-red-500 hover:text-white transition-all shadow-lg"
             >
-              Cancelar mi asistencia
+              {isCreator ? 'Cancelar partido' : 'Cancelar mi asistencia'}
             </button>
           ) : (
             <button 
-              // 3. CORRECCIÓN: Usamos match.idMatch
               onClick={() => onConfirmJoin(match.idMatch)}
               className="w-full bg-[#71AB46] text-white py-4 rounded-xl text-xs font-black uppercase tracking-[0.15em] hover:bg-opacity-90 transition-all active:scale-[0.98] shadow-lg shadow-[#71AB46]/20"
             >
