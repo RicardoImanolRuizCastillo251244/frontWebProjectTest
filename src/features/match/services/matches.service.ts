@@ -6,7 +6,7 @@ export interface MatchCreateData {
   idDeporte: number;
   fecha: string;
   hora: string;
-  lugar: string;        // String name (e.g. "Cancha Sur"), NOT an idLugar
+  idlugar: number;
   maxJugadores: number;
 }
 

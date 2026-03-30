@@ -15,13 +15,17 @@ export interface UseMatchesResult {
 function buildMatchesState(
   allMatches: Match[],
   playerMatches: Match[],
-  deportes: { idDeporte: number; nombreDeporte: string }[]
+  deportes: { idDeporte: number; nombreDeporte: string }[],
+  lugares: { idLugar: number; nombre: string }[]
 ): MatchesState {
   const playerMatchIds = new Set(playerMatches.map(m => m.idMatch));
   const deporteMap = new Map(deportes.map(d => [d.idDeporte, d.nombreDeporte]));
+  const lugarMap = new Map(lugares.map(l => [l.idLugar, l.nombre]));
 
   const enriched = allMatches.map(m => ({
     ...m,
+    idlugar: m.idlugar ?? m.idLugar,
+    lugar: m.lugar ?? lugarMap.get(m.idlugar ?? m.idLugar ?? -1) ?? 'Lugar desconocido',
     deporte: deporteMap.get(m.idDeporte) ?? `Deporte ${m.idDeporte}`,
     isJoined: playerMatchIds.has(m.idMatch),
   }));
@@ -43,12 +47,13 @@ export const useMatches = (): UseMatchesResult => {
     try {
       setLoading(true);
       setError(null);
-      const [allMatches, playerMatches, deportes] = await Promise.all([
+      const [allMatches, playerMatches, deportes, lugares] = await Promise.all([
         getMatches(),
         getPlayerMatches(user.idUser),
         catalogosService.getDeportes(),
+        catalogosService.getLugares(),
       ]);
-      setMatchesData(buildMatchesState(allMatches, playerMatches, deportes));
+      setMatchesData(buildMatchesState(allMatches, playerMatches, deportes, lugares));
     } catch (err: any) {
       if (err.message === 'SESION_EXPIRADA') return;
       setError(err.message || 'Error al cargar los partidos');

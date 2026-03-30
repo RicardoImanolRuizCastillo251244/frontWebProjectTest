@@ -4,10 +4,12 @@
 export interface Match {
   idMatch: number;
   idDeporte: number;
+  idlugar?: number;
+  idLugar?: number;
   deporte?: string;       // Enriched by the hook from the sports catalog
   fecha: string;          // YYYY-MM-DD
   hora: string;           // HH:mm:ss
-  lugar: string;
+  lugar?: string;         // Enriched by the hook from idlugar
   maxJugadores: number;
   numJugadores?: number;  // Not returned by API; kept for UI display (shows 0 if absent)
   descripcion?: string | null; // Optional; not always present in API response

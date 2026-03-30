@@ -71,15 +71,11 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
     setError(null);
 
     try {
-      // Look up the lugar name from the selected idLugar (API expects a string name)
-      const selectedLugar = lugares.find(l => l.idLugar === Number(formData.idLugar));
-      if (!selectedLugar) throw new Error('Selecciona un lugar válido');
-
       const payload: MatchCreateData = {
         idDeporte: Number(formData.idDeporte),
         fecha: formData.fecha,
         hora: formData.hora,
-        lugar: selectedLugar.nombre,
+        idlugar: Number(formData.idLugar),
         maxJugadores: Number(formData.maxJugadores)
       };
 
