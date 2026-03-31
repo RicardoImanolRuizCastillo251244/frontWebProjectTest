@@ -164,6 +164,12 @@ export const useMatches = (): UseMatchesResult => {
       await loadMatches();
     });
 
+    const onPartidoCreado = async (e: any) => {
+      await loadMatches();
+    };
+
+    window.addEventListener('partidoCreado', onPartidoCreado as EventListener);
+
     return () => {
       offPartidos();
       offNueva();
@@ -172,6 +178,7 @@ export const useMatches = (): UseMatchesResult => {
       try {
         socket && socket.off && socket.off('partidosEstadoActualizado');
       } catch (e) {}
+      window.removeEventListener('partidoCreado', onPartidoCreado as EventListener);
     };
   }, [user, loadMatches]);
 

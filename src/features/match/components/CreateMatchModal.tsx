@@ -81,8 +81,13 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
         equipoCreador: formData.equipoCreador
       };
 
-      await createMatch(payload);
-      
+      const created = await createMatch(payload);
+
+      // Emitir evento local para actualizar UI inmediatamente
+      try {
+        window.dispatchEvent(new CustomEvent('partidoCreado', { detail: created }));
+      } catch (e) {}
+
       onSuccess(); 
       onClose();   
       setFormData({ idDeporte: '', fecha: '', hora: '', idLugar: '', maxJugadores: '', equipoCreador: 'A' });
