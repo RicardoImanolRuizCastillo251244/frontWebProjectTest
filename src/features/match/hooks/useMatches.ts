@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { catalogosService } from '@/services/catalogos.service';
 import type { Match, MatchesState } from '../types/match.types';
-import { cancelMatch, getMatches, getPlayerMatches, joinMatch, leaveMatch } from '../services/matches.service';
+import { cancelMatch, getMatchParticipations, getMatches, getPlayerMatches, joinMatch, leaveMatch } from '../services/matches.service';
 
 export interface UseMatchesResult {
   matchesData: MatchesState | null;
@@ -96,13 +96,38 @@ export const useMatches = (): UseMatchesResult => {
       const allMatches = allMatchesResult.value;
       const deportes = deportesResult.value;
       const lugares = lugaresResult.value;
-      const playerMatches = playerMatchesResult.status === 'fulfilled' ? playerMatchesResult.value : [];
+      let playerMatches = playerMatchesResult.status === 'fulfilled' ? playerMatchesResult.value : [];
 
       if (playerMatchesResult.status === 'rejected') {
         const reasonMessage = playerMatchesResult.reason?.message || '';
         if (reasonMessage === 'SESION_EXPIRADA') {
           throw playerMatchesResult.reason;
         }
+
+        // Fallback: infer joined matches from per-match participations when the user endpoint fails.
+        const participationChecks = await Promise.allSettled(
+          allMatches.map((match) => getMatchParticipations(match.idMatch))
+        );
+
+        const joinedIds = new Set<number>();
+        participationChecks.forEach((result) => {
+          if (result.status !== 'fulfilled') {
+            return;
+          }
+
+          const isUserInMatch = result.value.participaciones.some(
+            (participacion) => participacion.idUser === user.idUser
+          );
+
+          if (isUserInMatch) {
+            joinedIds.add(result.value.idMatch);
+          }
+        });
+
+        if (joinedIds.size > 0) {
+          playerMatches = allMatches.filter((match) => joinedIds.has(match.idMatch));
+        }
+
         setError('No se pudo cargar la lista de partidos donde participas. Puedes ver los partidos disponibles.');
       }
 
