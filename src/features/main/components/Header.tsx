@@ -10,7 +10,6 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ fixed = true }) => {
   const { user } = useAuth(); // Ya no necesitamos 'logout' ni 'navigate' aquí
-  console.log("Header renderizado. Usuario:", user);
   const headerElement = (
     <header
       className="h-20 bg-[#0F172A] flex items-center justify-between px-8"
