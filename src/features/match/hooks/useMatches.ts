@@ -3,6 +3,7 @@ import { useAuth } from '@/features/auth/context/AuthContext';
 import { catalogosService } from '@/services/catalogos.service';
 import type { Match, MatchesState } from '../types/match.types';
 import { cancelMatch, getMatchParticipations, getMatches, getPlayerMatches, joinMatch, leaveMatch, type MatchTeam } from '../services/matches.service';
+import { connectSocket, onEvento } from '@/services/socket';
 
 export interface UseMatchesResult {
   matchesData: MatchesState | null;
@@ -144,6 +145,35 @@ export const useMatches = (): UseMatchesResult => {
   useEffect(() => {
     loadMatches();
   }, [loadMatches]);
+
+  // Socket listeners para actualizaciones en tiempo real
+  useEffect(() => {
+    if (!user) return;
+
+    const socket = connectSocket();
+
+    const offPartidos = onEvento('partidosEstadoActualizado', async () => {
+      await loadMatches();
+    });
+
+    const offNueva = onEvento('nuevaReta', async () => {
+      await loadMatches();
+    });
+
+    const offCancel = onEvento('partidoCancelado', async () => {
+      await loadMatches();
+    });
+
+    return () => {
+      offPartidos();
+      offNueva();
+      offCancel();
+      // not disconnecting global socket here to allow other components reuse
+      try {
+        socket && socket.off && socket.off('partidosEstadoActualizado');
+      } catch (e) {}
+    };
+  }, [user, loadMatches]);
 
   const handleToggleParticipation = async (matchId: number, isJoined: boolean, equipo?: MatchTeam) => {
     if (!matchesData || !user) return;

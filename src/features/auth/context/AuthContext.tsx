@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isValidStoredToken } from '../utils/token';
+import { disconnectSocket } from '@/services/socket';
+import { getTokenExpirySeconds } from '../utils/token';
 
 interface AuthUser {
   idUser: number;
@@ -40,8 +42,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('user');
     setToken(null);
     setUser(null);
+    try {
+      disconnectSocket();
+    } catch (e) {}
     navigate('/auth/login', { replace: true });
   }, [navigate]);
+
+  const expiryTimerRef = useRef<number | null>(null);
+
+  // Schedule auto-logout when token expires
+  useEffect(() => {
+    if (expiryTimerRef.current) {
+      window.clearTimeout(expiryTimerRef.current);
+      expiryTimerRef.current = null;
+    }
+
+    const expirySec = getTokenExpirySeconds(token);
+    if (expirySec) {
+      const msUntil = expirySec * 1000 - Date.now();
+      if (msUntil <= 0) {
+        // already expired
+        logout();
+      } else {
+        expiryTimerRef.current = window.setTimeout(() => {
+          // force logout when token expires
+          logout();
+        }, msUntil + 1000); // add small buffer
+      }
+    }
+
+    return () => {
+      if (expiryTimerRef.current) {
+        window.clearTimeout(expiryTimerRef.current);
+        expiryTimerRef.current = null;
+      }
+    };
+  }, [token, logout]);
 
   useEffect(() => {
     const syncLogout = (event: StorageEvent) => {
