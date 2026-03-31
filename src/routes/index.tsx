@@ -3,16 +3,14 @@ import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { AuthLayout } from "@/layouts/AuthLayout";
 import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
+import { NotFoundPage } from "@/pages/NotFoundPage";
 import MainPage from "@/pages/MainPage";
 import Header from "@/features/main/components/Header";
 import { ProfilePage } from "@/features/profile";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PublicRoute } from "./PublicRoute";
-import { useAuth } from "@/features/auth/context/AuthContext";
 
 export const AppRoutes: React.FC = () => {
-  const { isAuthenticated } = useAuth();
-
   return (
     <Routes>
       <Route path="/login" element={<Navigate to="/auth/login" replace />} />
@@ -51,16 +49,7 @@ export const AppRoutes: React.FC = () => {
         </Route>
       </Route>
 
-      {/* Fallback inteligente: Si no existe la ruta, intenta ir al inicio */}
-      <Route
-        path="*"
-        element={
-          <Navigate
-            to={isAuthenticated ? "/mainpage" : "/auth/login"}
-            replace
-          />
-        }
-      />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };
