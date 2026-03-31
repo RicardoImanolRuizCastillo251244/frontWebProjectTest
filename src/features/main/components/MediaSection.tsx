@@ -7,9 +7,12 @@ import logoCalendario from '@/assets/images/calendario.png';
 import logoIntegrantes from '@/assets/images/integrantes.png';
 import logoDeportes from '@/assets/images/deportes.png';
 
+interface JugadoresResponse {
+  pagination?: { total: number };
+}
+
 interface StatusEstadisticas {
   deportes: number;
-  jugadores: number;
   partidos: number;
 }
 
@@ -18,35 +21,42 @@ interface StatusResponse {
 }
 
 const MediaSection: React.FC<MediaSectionProps> = ({ className = '' }) => {
-  const [stats, setStats] = useState<StatusEstadisticas | null>(null);
+  const [jugadoresTotal, setJugadoresTotal] = useState<number | null>(null);
+  const [statusStats, setStatusStats] = useState<StatusEstadisticas | null>(null);
 
   useEffect(() => {
+    apiFetchJson<JugadoresResponse>('/jugadores/')
+      .then((data) => {
+        if (data.pagination?.total !== undefined) {
+          setJugadoresTotal(data.pagination.total);
+        }
+      })
+      .catch(() => {});
+
     apiFetchJson<StatusResponse>('/status')
       .then((data) => {
-        if (data.estadisticas) setStats(data.estadisticas);
+        if (data.estadisticas) setStatusStats(data.estadisticas);
       })
-      .catch(() => {
-        // silently fall back to placeholders
-      });
+      .catch(() => {});
   }, []);
 
   const STATS = [
     {
       id: 'partidos',
       iconSrc: logoCalendario,
-      label: stats ? `${stats.partidos} Partidos registrados` : 'Partidos registrados',
+      label: statusStats ? `${statusStats.partidos} Partidos registrados` : 'Partidos registrados',
       altText: 'Logo Partidos registrados',
     },
     {
       id: 'jugadores',
       iconSrc: logoIntegrantes,
-      label: stats ? `${stats.jugadores} Jugadores registrados` : 'Jugadores registrados',
+      label: jugadoresTotal !== null ? `${jugadoresTotal} Jugadores registrados` : 'Jugadores registrados',
       altText: 'Logo Jugadores registrados',
     },
     {
       id: 'deportes',
       iconSrc: logoDeportes,
-      label: stats ? `${stats.deportes} Deportes disponibles` : 'Deportes disponibles',
+      label: statusStats ? `${statusStats.deportes} Deportes disponibles` : 'Deportes disponibles',
       altText: 'Logo Deportes disponibles',
     },
   ];
