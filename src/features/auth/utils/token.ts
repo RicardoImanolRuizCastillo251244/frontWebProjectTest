@@ -1,12 +1,22 @@
 function parseJwt(token: string) {
   try {
     const payload = token.split('.')[1];
-    const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
-    return JSON.parse(decodeURIComponent(
-      decoded.split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join('')
-    ));
+    if (!payload) return null;
+    // base64url -> base64
+    let base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    // pad with '='
+    while (base64.length % 4) base64 += '=';
+    const decoded = atob(base64);
+    try {
+      return JSON.parse(decoded);
+    } catch (e) {
+      // fallback: try decodeURIComponent approach
+      return JSON.parse(decodeURIComponent(
+        decoded.split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join('')
+      ));
+    }
   } catch (e) {
     return null;
   }

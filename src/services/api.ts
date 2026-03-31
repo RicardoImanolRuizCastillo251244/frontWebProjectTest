@@ -1,7 +1,10 @@
-export const API_BASE_URL = (
-  import.meta.env.VITE_API_URL ||
-  'https://backcourtmatchproduction-production.up.railway.app/api'
-).replace(/\/$/, '');
+// Normalize VITE_API_URL so it can be provided either as origin or as origin + /api
+const rawUrl = import.meta.env.VITE_API_URL || 'https://backcourtmatchproduction-production.up.railway.app';
+const normalizedOrigin = rawUrl.replace(/\/api\/?$/i, '').replace(/\/$/, '');
+export const API_BASE_URL = `${normalizedOrigin}/api`;
+
+// Export origin for sockets or other usages
+export const API_ORIGIN = normalizedOrigin;
 
 type ApiErrorShape = {
   error?: string;
