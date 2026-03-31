@@ -210,144 +210,135 @@ const MatchModal: React.FC<MatchModalProps> = ({
             </div>
           )}
 
-          {!isJoined && (
-            <div className="mb-6 rounded-2xl border border-white/10 bg-black/20 p-4 sm:p-5">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h4 className="text-[10px] text-white/35 uppercase font-bold tracking-widest">Elige tu equipo</h4>
-                  <p className="text-sm text-white/65 mt-1">Selecciona primero entre A y B para continuar.</p>
-                </div>
-                {loadingParticipants && (
-                  <span className="text-[10px] uppercase tracking-widest text-white/40">Cargando...</span>
-                )}
+          <div className="space-y-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-[10px] text-white/30 uppercase font-bold tracking-widest">
+                  {isJoined ? 'Integrantes por equipo' : 'Elige tu equipo'}
+                </h4>
+                <p className="text-sm text-white/60 mt-1">
+                  {isJoined
+                    ? 'Aqui puedes ver quién está en el equipo A y en el equipo B.'
+                    : 'Selecciona A o B en estas mismas tarjetas y revisa quiénes ya están inscritos.'}
+                </p>
               </div>
-
-              {participantsError && (
-                <div className="mb-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-                  {participantsError}
-                </div>
+              {loadingParticipants && (
+                <span className="text-[10px] uppercase tracking-widest text-white/40">Cargando...</span>
               )}
+            </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {[
-                  { team: 'A' as MatchTeam, players: teamAPlayers },
-                  { team: 'B' as MatchTeam, players: teamBPlayers },
-                ].map(({ team, players }) => {
-                  const isSelectedTeam = selectedTeam === team;
-                  const isTeamFull = players.length >= teamCapacity;
+            {participantsError && (
+              <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                {participantsError}
+              </div>
+            )}
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                { team: 'A' as MatchTeam, players: teamAPlayers },
+                { team: 'B' as MatchTeam, players: teamBPlayers },
+              ].map(({ team, players }) => {
+                const isSelectedTeam = selectedTeam === team;
+                const isTeamFull = players.length >= teamCapacity;
+                const cardBaseClass = `rounded-xl border bg-black/20 overflow-hidden text-left transition-all ${
+                  !isJoined && isSelectedTeam
+                    ? 'border-[#71AB46] shadow-lg shadow-[#71AB46]/10'
+                    : !isJoined && isTeamFull
+                      ? 'border-red-500/20 opacity-70 cursor-not-allowed'
+                      : 'border-white/10'
+                } ${!isJoined && !isTeamFull ? 'hover:border-white/30' : ''}`;
+
+                const cardContent = (
+                  <>
+                    {isSelectedTeam && !isJoined && <div className="h-1.5 w-full bg-[#71AB46]" />}
+                    <div className="flex items-start justify-between gap-3 px-4 py-3 border-b border-white/5">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Equipo</p>
+                        <p className="text-white text-lg font-black mt-1">{team}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        {isSelectedTeam && !isJoined && (
+                          <span className="inline-flex items-center justify-center rounded-full border border-[#71AB46]/40 bg-[#71AB46]/15 w-6 h-6 text-[12px] font-black text-[#A8D68A] mb-2">
+                            <span>✓</span>
+                          </span>
+                        )}
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-white/30">Jugadores</p>
+                        <p className="text-[#71AB46] text-lg font-black mt-1">{players.length}/{teamCapacity}</p>
+                      </div>
+                    </div>
+
+                    {!isJoined && (
+                      <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02]">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-white/35 mb-1">Seleccion</p>
+                        <p className={`text-xs font-semibold leading-relaxed ${isSelectedTeam ? 'text-[#A8D68A]' : isTeamFull ? 'text-red-300' : 'text-white/75'}`}>
+                          {isTeamFull
+                            ? 'Equipo lleno'
+                            : isSelectedTeam
+                              ? 'Equipo seleccionado'
+                              : 'Haz clic aqui para unirte a este equipo'}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="px-4 py-3 space-y-3 min-h-28">
+                      {players.length === 0 ? (
+                        <p className="text-sm text-white/35">Aun no hay jugadores en este equipo.</p>
+                      ) : (
+                        players.map((participant) => (
+                          <div key={participant.idParticipacion} className="flex items-center justify-between gap-4 rounded-lg px-2 py-1.5 bg-white/[0.02]">
+                            <div>
+                              <p className="text-sm text-white font-medium">{participant.usuario.nombreUsuario || `Jugador ${participant.usuario.idUser}`}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {participant.usuario.idUser === user?.idUser && (
+                                <span className="rounded-full border border-sky-400/30 bg-sky-400/10 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-sky-200">
+                                  Tu
+                                </span>
+                              )}
+                              {participant.esCreador && (
+                                <span className="rounded-full border border-[#71AB46]/40 bg-[#71AB46]/10 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-[#A8D68A]">
+                                  Creador
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </>
+                );
+
+                if (!isJoined) {
                   return (
                     <button
                       key={team}
                       type="button"
                       onClick={() => !isTeamFull && setSelectedTeam(team)}
                       disabled={isTeamFull}
-                      className={`rounded-xl border bg-slate-900/60 p-4 text-left transition-all ${
-                        isSelectedTeam
-                          ? 'border-[#71AB46] shadow-lg shadow-[#71AB46]/15'
-                          : isTeamFull
-                            ? 'border-red-500/30 opacity-70 cursor-not-allowed'
-                            : 'border-white/15 hover:border-white/35'
-                      }`}
+                      className={cardBaseClass}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-[10px] uppercase tracking-[0.2em] text-white/45">Equipo</p>
-                          <p className="text-white text-2xl font-black mt-1">{team}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[10px] uppercase tracking-[0.2em] text-white/35">Jugadores</p>
-                          <p className="text-[#71AB46] text-xl font-black mt-1">{players.length}/{teamCapacity}</p>
-                        </div>
-                      </div>
-                      <p className={`mt-3 text-xs font-semibold ${isSelectedTeam ? 'text-[#A8D68A]' : isTeamFull ? 'text-red-300' : 'text-white/75'}`}>
-                        {isTeamFull
-                          ? 'Equipo lleno'
-                          : isSelectedTeam
-                            ? 'Equipo seleccionado'
-                            : 'Haz clic para elegir este equipo'}
-                      </p>
+                      {cardContent}
                     </button>
                   );
-                })}
-              </div>
+                }
+
+                return (
+                  <div key={team} className={cardBaseClass}>
+                    {cardContent}
+                  </div>
+                );
+              })}
             </div>
-          )}
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-[180px_minmax(0,1fr)] gap-4 items-start">
-            <div className="space-y-4">
-              <div className="p-4 bg-white/5 rounded-xl">
-                <span className="text-[10px] text-white/50 uppercase font-bold tracking-widest block mb-1">Cupos</span>
-                <span className="text-white font-roboto font-bold text-2xl">
-                  <span className="text-[#71AB46]">{totalPlayers}</span>
-                  <span className="text-white/20 mx-1">/</span>
-                  {match.maxJugadores}
-                </span>
-                <p className="text-xs text-white/40 mt-2">{Math.max(match.maxJugadores - totalPlayers, 0)} cupos disponibles en total</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="text-[10px] text-white/30 uppercase font-bold tracking-widest">
-                Integrantes por equipo
-              </h4>
-              <p className="text-sm text-white/60 -mt-2">Aqui puedes ver quién está en el equipo A y en el equipo B.</p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {[
-                  { team: 'A' as MatchTeam, players: teamAPlayers },
-                  { team: 'B' as MatchTeam, players: teamBPlayers },
-                ].map(({ team, players }) => {
-                  const isSelectedTeam = selectedTeam === team;
-
-                  return (
-                    <div
-                      key={team}
-                      className={`rounded-xl border bg-black/20 overflow-hidden ${
-                        isSelectedTeam ? 'border-[#71AB46]/50' : 'border-white/10'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-3 px-4 py-3 border-b border-white/5">
-                        <div>
-                          <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Equipo</p>
-                          <p className="text-white text-lg font-black mt-1">{team}</p>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <p className="text-[10px] uppercase tracking-[0.2em] text-white/30">Jugadores</p>
-                          <p className="text-[#71AB46] text-lg font-black mt-1">{players.length}/{teamCapacity}</p>
-                        </div>
-                      </div>
-
-                      <div className="px-4 py-3 space-y-3 min-h-28">
-                        {players.length === 0 ? (
-                          <p className="text-sm text-white/35">Aun no hay jugadores en este equipo.</p>
-                        ) : (
-                          players.map((participant) => (
-                            <div key={participant.idParticipacion} className="flex items-center justify-between gap-4 rounded-lg px-2 py-1.5 bg-white/[0.02]">
-                              <div>
-                                <p className="text-sm text-white font-medium">{participant.usuario.nombreUsuario || `Jugador ${participant.usuario.idUser}`}</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {participant.usuario.idUser === user?.idUser && (
-                                  <span className="rounded-full border border-sky-400/30 bg-sky-400/10 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-sky-200">
-                                    Tu
-                                  </span>
-                                )}
-                                {participant.esCreador && (
-                                  <span className="rounded-full border border-[#71AB46]/40 bg-[#71AB46]/10 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-[#A8D68A]">
-                                    Creador
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+          <div className="mb-6 p-4 bg-white/5 rounded-xl">
+            <span className="text-[10px] text-white/50 uppercase font-bold tracking-widest block mb-1">Cupos</span>
+            <span className="text-white font-roboto font-bold text-2xl">
+              <span className="text-[#71AB46]">{totalPlayers}</span>
+              <span className="text-white/20 mx-1">/</span>
+              {match.maxJugadores}
+            </span>
+            <p className="text-xs text-white/40 mt-2">{Math.max(match.maxJugadores - totalPlayers, 0)} cupos disponibles en total</p>
           </div>
 
           <div className="mt-6">
