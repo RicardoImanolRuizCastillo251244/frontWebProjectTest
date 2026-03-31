@@ -55,6 +55,7 @@ export interface FooterProps {
 export interface MediaStat {
   id: string;
   iconSrc: string;
+  value?: string | number | null;
   label: string;
   altText: string;
 }
