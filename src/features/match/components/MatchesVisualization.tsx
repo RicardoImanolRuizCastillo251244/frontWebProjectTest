@@ -134,7 +134,7 @@ const MatchesVisualization: React.FC = () => {
                   match={match}
                   actionText={
                     activeTab === "disponibles"
-                      ? "Unirse"
+                      ? "Ver y elegir equipo"
                       : match.idCreador === user?.idUser
                         ? "Ver / Gestionar"
                         : "Ver / Cancelar"

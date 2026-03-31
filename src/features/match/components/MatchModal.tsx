@@ -150,12 +150,17 @@ const MatchModal: React.FC<MatchModalProps> = ({
 
         {/* Cuerpo */}
         <div className="p-6 overflow-y-auto">
-          <h4 className="text-[10px] text-white/30 uppercase font-bold tracking-widest mb-2">
-            Descripción del encuentro
-          </h4>
-          <p className="text-white/80 font-roboto text-sm leading-relaxed mb-6">
-            {match.descripcion || "Sin descripción disponible para este partido."}
-          </p>
+          {!isJoined && (
+            <div className="mb-6 rounded-2xl border border-[#71AB46]/25 bg-[#71AB46]/10 px-5 py-4">
+              <p className="text-[10px] uppercase tracking-[0.25em] text-[#A8D68A] font-black mb-2">
+                Flujo de Inscripcion
+              </p>
+              <h3 className="text-white text-lg font-black mb-2">Selecciona tu equipo antes de unirte</h3>
+              <p className="text-sm text-white/70 leading-relaxed">
+                Revisa cuántos jugadores hay en cada equipo, elige si quieres entrar al equipo A o al B y luego confirma tu asistencia.
+              </p>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)] gap-6 items-start">
             <div className="space-y-4">
@@ -171,8 +176,11 @@ const MatchModal: React.FC<MatchModalProps> = ({
 
               {!isJoined && (
                 <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                  <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mb-3">
+                  <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mb-1">
                     Elegir equipo
+                  </p>
+                  <p className="text-sm text-white/65 mb-4">
+                    Selecciona el equipo en el que quieres jugar.
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     {(['A', 'B'] as MatchTeam[]).map((team) => {
@@ -210,9 +218,12 @@ const MatchModal: React.FC<MatchModalProps> = ({
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="text-[10px] text-white/30 uppercase font-bold tracking-widest">
-                  Integrantes por equipo
-                </h4>
+                <div>
+                  <h4 className="text-[10px] text-white/30 uppercase font-bold tracking-widest">
+                    Integrantes por equipo
+                  </h4>
+                  <p className="text-sm text-white/60 mt-1">Aqui puedes ver quién está en el equipo A y en el equipo B.</p>
+                </div>
                 {loadingParticipants && (
                   <span className="text-[10px] uppercase tracking-widest text-white/40">Cargando...</span>
                 )}
@@ -273,6 +284,15 @@ const MatchModal: React.FC<MatchModalProps> = ({
                 ))}
               </div>
             </div>
+          </div>
+
+          <div className="mt-8">
+            <h4 className="text-[10px] text-white/30 uppercase font-bold tracking-widest mb-2">
+              Descripción del encuentro
+            </h4>
+            <p className="text-white/80 font-roboto text-sm leading-relaxed">
+              {match.descripcion || "Sin descripción disponible para este partido."}
+            </p>
           </div>
         </div>
 
