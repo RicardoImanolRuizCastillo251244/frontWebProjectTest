@@ -3,6 +3,32 @@ import { useAuth } from '@/features/auth/context/AuthContext';
 import { getMatchParticipants, type MatchTeam } from '../services/matches.service';
 import { Match, MatchParticipant } from '../types/match.types';
 
+const getStatusMeta = (status?: string) => {
+  switch (status) {
+    case 'en_curso':
+      return {
+        label: 'En curso',
+        className: 'border-amber-400/30 bg-amber-400/10 text-amber-200',
+      };
+    case 'finalizado':
+      return {
+        label: 'Finalizado',
+        className: 'border-slate-400/30 bg-slate-400/10 text-slate-200',
+      };
+    case 'cancelado':
+      return {
+        label: 'Cancelado',
+        className: 'border-red-400/30 bg-red-400/10 text-red-200',
+      };
+    case 'programado':
+    default:
+      return {
+        label: 'Programado',
+        className: 'border-[#71AB46]/30 bg-[#71AB46]/10 text-[#C7E7B2]',
+      };
+  }
+};
+
 interface MatchModalProps {
   isOpen: boolean;
   match: Match | null;
@@ -96,6 +122,7 @@ const MatchModal: React.FC<MatchModalProps> = ({
 
   const teamCapacity = useMemo(() => Math.ceil((match?.maxJugadores ?? 0) / 2), [match?.maxJugadores]);
   const totalPlayers = participants.length || match?.numJugadores || 0;
+  const statusMeta = getStatusMeta(match?.estado);
 
   useEffect(() => {
     if (isJoined || !selectedTeam) {
@@ -134,9 +161,14 @@ const MatchModal: React.FC<MatchModalProps> = ({
         {/* Header */}
         <div className="sticky top-0 z-10 flex justify-between items-start p-6 border-b border-white/5 bg-[#0C2143]">
           <div>
-            <span className="text-[#71AB46] text-[10px] font-black uppercase tracking-[0.2em]">
-              {match.deporte}
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[#71AB46] text-[10px] font-black uppercase tracking-[0.2em]">
+                {match.deporte}
+              </span>
+              <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${statusMeta.className}`}>
+                {statusMeta.label}
+              </span>
+            </div>
             <h2 className="text-white font-roboto font-bold text-xl uppercase tracking-tight mt-1">
               {match.lugar}
             </h2>
@@ -166,6 +198,15 @@ const MatchModal: React.FC<MatchModalProps> = ({
               <p className="text-sm text-white/70 leading-relaxed">
                 Revisa cuántos jugadores hay en cada equipo, elige si quieres entrar al equipo A o al B y luego confirma tu asistencia.
               </p>
+            </div>
+          )}
+
+          {match.motivoCancelacion && (
+            <div className="mb-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-5 py-4">
+              <p className="text-[10px] uppercase tracking-[0.25em] text-red-200 font-black mb-2">
+                Motivo de cancelacion
+              </p>
+              <p className="text-sm text-red-100/90 leading-relaxed">{match.motivoCancelacion}</p>
             </div>
           )}
 

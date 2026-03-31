@@ -2,6 +2,32 @@ import React from 'react';
 // 1. Apuntamos al nuevo archivo de tipos que creamos en la limpieza
 import { Match } from '../types/match.types'; 
 
+const getStatusMeta = (status?: string) => {
+  switch (status) {
+    case 'en_curso':
+      return {
+        label: 'En curso',
+        className: 'border-amber-400/30 bg-amber-400/10 text-amber-200',
+      };
+    case 'finalizado':
+      return {
+        label: 'Finalizado',
+        className: 'border-slate-400/30 bg-slate-400/10 text-slate-200',
+      };
+    case 'cancelado':
+      return {
+        label: 'Cancelado',
+        className: 'border-red-400/30 bg-red-400/10 text-red-200',
+      };
+    case 'programado':
+    default:
+      return {
+        label: 'Programado',
+        className: 'border-[#71AB46]/30 bg-[#71AB46]/10 text-[#C7E7B2]',
+      };
+  }
+};
+
 interface MatchCardProps {
   match: Match;
   actionText: string;
@@ -10,13 +36,20 @@ interface MatchCardProps {
 }
 
 const MatchCard: React.FC<MatchCardProps> = ({ match, actionText, onActionClick }) => {
+  const statusMeta = getStatusMeta(match.estado);
+
   return (
     <div className="bg-[#0C2143] border-2 border-white/5 rounded-2xl p-6 flex flex-col gap-4 shadow-xl hover:border-white/10 transition-all group">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <span className="text-[#71AB46] text-[10px] font-black uppercase tracking-[0.2em]">
-          {match.deporte}
-        </span>
+        <div className="flex flex-col gap-2">
+          <span className="text-[#71AB46] text-[10px] font-black uppercase tracking-[0.2em]">
+            {match.deporte}
+          </span>
+          <span className={`inline-flex w-fit items-center rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${statusMeta.className}`}>
+            {statusMeta.label}
+          </span>
+        </div>
         <div className="flex flex-col items-end text-white font-bold text-xs uppercase">
           <span>{match.fecha}</span>
           <span className="text-white/40 text-[10px]">{match.hora}</span>

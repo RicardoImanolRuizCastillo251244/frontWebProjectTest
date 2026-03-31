@@ -20,6 +20,8 @@ export interface MatchParticipant {
   esCreador?: boolean;
 }
 
+export type MatchStatus = 'programado' | 'en_curso' | 'finalizado' | 'cancelado' | string;
+
 export interface Match {
   idMatch: number;
   idDeporte: number;
@@ -32,6 +34,8 @@ export interface Match {
   hora: string;           // HH:mm:ss
   lugar?: string;         // Enriched by the hook from idlugar
   maxJugadores: number;
+  estado?: MatchStatus;
+  motivoCancelacion?: string | null;
   participantesActuales?: number;
   numJugadores?: number;  // Not returned by API; kept for UI display (shows 0 if absent)
   descripcion?: string | null; // Optional; not always present in API response
