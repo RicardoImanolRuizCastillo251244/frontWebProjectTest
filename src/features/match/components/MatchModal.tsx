@@ -155,8 +155,8 @@ const MatchModal: React.FC<MatchModalProps> = ({
   if (!isOpen || !match) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 bg-slate-950/80 backdrop-blur-sm transition-all overflow-y-auto">
-      <div className="bg-[#0C2143] border border-white/10 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200 max-h-[88vh] my-auto">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 md:p-8 bg-slate-950/80 backdrop-blur-sm transition-all overflow-y-auto">
+      <div className="bg-[#0C2143] border border-white/10 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200 max-h-[78vh] my-auto">
         
         {/* Header */}
         <div className="sticky top-0 z-10 flex justify-between items-start p-6 border-b border-white/5 bg-[#0C2143]">
