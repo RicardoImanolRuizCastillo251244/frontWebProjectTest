@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import logoCourtUrl from "@/assets/images/logoCourt.png";
-import perfilTest from "@/assets/images/perfilTest.jpg";
 
 interface HeaderProps {
   fixed?: boolean;
@@ -37,7 +36,7 @@ const Header: React.FC<HeaderProps> = ({ fixed = true }) => {
       {/* LADO DERECHO: Acceso al Perfil */}
       <div className="flex items-center">
         {/* LADO DERECHO: Acceso al Perfil */}
-        <Link to="/perfil" className="flex items-center gap-3 group">
+        <Link to="/perfil" className="flex items-center group">
           <div className="flex flex-col items-end">
             <span className="text-[9px] text-[#71AB46] font-black uppercase tracking-[0.2em] leading-none mb-1 opacity-80">
               Mi Cuenta
@@ -48,16 +47,6 @@ const Header: React.FC<HeaderProps> = ({ fixed = true }) => {
             >
               {typeof user === "string" ? user : user?.nombreUsuario || "Usuario"}
             </span>
-          </div>
-
-          <div className="relative">
-            <img
-              src={perfilTest}
-              alt="Perfil"
-              className="w-12 h-12 rounded-full border-2 border-[#71AB46] object-cover group-hover:scale-105 transition-all duration-300 shadow-lg shadow-black/20"
-            />
-            {/* Punto de estado "Online" */}
-            <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#71AB46] rounded-full border-2 border-[#0F172A]"></span>
           </div>
         </Link>
       </div>
