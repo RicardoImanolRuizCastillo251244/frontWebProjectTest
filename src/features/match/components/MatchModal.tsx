@@ -128,11 +128,11 @@ const MatchModal: React.FC<MatchModalProps> = ({
   if (!isOpen || !match) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm transition-all">
-      <div className="bg-[#0C2143] border border-white/10 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200 max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 bg-slate-950/80 backdrop-blur-sm transition-all overflow-y-auto">
+      <div className="bg-[#0C2143] border border-white/10 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200 max-h-[88vh] my-auto">
         
         {/* Header */}
-        <div className="flex justify-between items-start p-6 border-b border-white/5">
+        <div className="sticky top-0 z-10 flex justify-between items-start p-6 border-b border-white/5 bg-[#0C2143]">
           <div>
             <span className="text-[#71AB46] text-[10px] font-black uppercase tracking-[0.2em]">
               {match.deporte}
@@ -145,7 +145,14 @@ const MatchModal: React.FC<MatchModalProps> = ({
               <span>⏰ {match.hora}</span>
             </div>
           </div>
-          <button onClick={onClose} className="text-white/40 hover:text-white transition-colors text-lg">✕</button>
+          <button
+            onClick={onClose}
+            type="button"
+            aria-label="Cerrar modal"
+            className="ml-4 shrink-0 rounded-full border border-white/15 bg-black/25 px-3 py-2 text-white/80 hover:text-white hover:border-white/30 transition-colors text-sm leading-none"
+          >
+            X
+          </button>
         </div>
 
         {/* Cuerpo */}
@@ -173,47 +180,6 @@ const MatchModal: React.FC<MatchModalProps> = ({
                 </span>
                 <p className="text-xs text-white/40 mt-2">{Math.max(match.maxJugadores - totalPlayers, 0)} cupos disponibles en total</p>
               </div>
-
-              {!isJoined && (
-                <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                  <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mb-1">
-                    Elegir equipo
-                  </p>
-                  <p className="text-sm text-white/65 mb-4">
-                    Selecciona el equipo en el que quieres jugar.
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {(['A', 'B'] as MatchTeam[]).map((team) => {
-                      const teamCount = team === 'A' ? teamAPlayers.length : teamBPlayers.length;
-                      const isSelected = selectedTeam === team;
-                      const isTeamFull = teamCount >= teamCapacity;
-
-                      return (
-                        <button
-                          key={team}
-                          type="button"
-                          onClick={() => setSelectedTeam(team)}
-                          disabled={isTeamFull}
-                          className={`rounded-xl border px-4 py-4 text-left transition-all ${
-                            isSelected
-                              ? 'border-[#71AB46] bg-[#71AB46]/15 text-white shadow-lg shadow-[#71AB46]/10'
-                              : isTeamFull
-                                ? 'border-red-500/20 bg-red-500/10 text-white/40 cursor-not-allowed'
-                                : 'border-white/10 bg-black/20 text-white/80 hover:border-white/30'
-                          }`}
-                        >
-                          <span className="block text-[10px] uppercase tracking-[0.2em] text-white/40 mb-1">Equipo</span>
-                          <span className="block text-2xl font-black">{team}</span>
-                          <span className="block text-xs text-white/50 mt-2">{teamCount}/{teamCapacity} jugadores</span>
-                          <span className={`block text-[10px] uppercase tracking-widest mt-2 ${isTeamFull ? 'text-red-300' : 'text-[#A8D68A]'}`}>
-                            {isTeamFull ? 'Equipo lleno' : `${teamCapacity - teamCount} cupo${teamCapacity - teamCount === 1 ? '' : 's'} libre${teamCapacity - teamCount === 1 ? '' : 's'}`}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="space-y-4">
@@ -239,18 +205,54 @@ const MatchModal: React.FC<MatchModalProps> = ({
                 {[
                   { team: 'A' as MatchTeam, players: teamAPlayers },
                   { team: 'B' as MatchTeam, players: teamBPlayers },
-                ].map(({ team, players }) => (
-                  <div key={team} className="rounded-xl border border-white/10 bg-black/20 overflow-hidden">
+                ].map(({ team, players }) => {
+                  const isSelectedTeam = selectedTeam === team;
+                  const isTeamFull = players.length >= teamCapacity;
+
+                  return (
+                  <button
+                    key={team}
+                    type="button"
+                    onClick={() => !isJoined && !isTeamFull && setSelectedTeam(team)}
+                    disabled={isJoined || isTeamFull}
+                    className={`rounded-xl border bg-black/20 overflow-hidden text-left transition-all ${
+                      !isJoined && isSelectedTeam
+                        ? 'border-[#71AB46] shadow-lg shadow-[#71AB46]/10'
+                        : isTeamFull && !isJoined
+                          ? 'border-red-500/20 opacity-70 cursor-not-allowed'
+                          : 'border-white/10'
+                    } ${!isJoined && !isTeamFull ? 'hover:border-white/30' : ''}`}
+                  >
+                    {isSelectedTeam && !isJoined && <div className="h-1.5 w-full bg-[#71AB46]" />}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
                       <div>
                         <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Equipo</p>
                         <p className="text-white text-lg font-black mt-1">{team}</p>
                       </div>
                       <div className="text-right">
+                        {isSelectedTeam && !isJoined && (
+                          <span className="inline-flex items-center gap-1 rounded-full border border-[#71AB46]/40 bg-[#71AB46]/15 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-[#A8D68A] mb-2">
+                            <span>✓</span>
+                            <span>Seleccionado</span>
+                          </span>
+                        )}
                         <p className="text-[10px] uppercase tracking-[0.2em] text-white/30">Jugadores</p>
                         <p className="text-[#71AB46] text-lg font-black mt-1">{players.length}/{teamCapacity}</p>
                       </div>
                     </div>
+
+                    {!isJoined && (
+                      <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02]">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-white/35 mb-1">Seleccion</p>
+                        <p className={`text-sm font-semibold ${isSelectedTeam ? 'text-[#A8D68A]' : isTeamFull ? 'text-red-300' : 'text-white/75'}`}>
+                          {isTeamFull
+                            ? 'Equipo lleno'
+                            : isSelectedTeam
+                              ? 'Equipo seleccionado'
+                              : 'Haz clic aqui para unirte a este equipo'}
+                        </p>
+                      </div>
+                    )}
 
                     <div className="px-4 py-3 space-y-3 min-h-28">
                       {players.length === 0 ? (
@@ -260,9 +262,6 @@ const MatchModal: React.FC<MatchModalProps> = ({
                           <div key={participant.idParticipacion} className="flex items-center justify-between gap-4 rounded-lg px-2 py-1.5 bg-white/[0.02]">
                             <div>
                               <p className="text-sm text-white font-medium">{participant.usuario.nombreUsuario || `Jugador ${participant.usuario.idUser}`}</p>
-                              <p className="text-[11px] text-white/40">
-                                {participant.usuario.idUser === user?.idUser ? 'Tú' : participant.usuario.correo || 'Sin correo disponible'}
-                              </p>
                             </div>
                             <div className="flex items-center gap-2">
                               {participant.usuario.idUser === user?.idUser && (
@@ -280,8 +279,8 @@ const MatchModal: React.FC<MatchModalProps> = ({
                         ))
                       )}
                     </div>
-                  </div>
-                ))}
+                  </button>
+                )})}
               </div>
             </div>
           </div>
