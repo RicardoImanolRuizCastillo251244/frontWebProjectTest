@@ -1,5 +1,5 @@
 import { apiFetchJson } from '@/services/api';
-import type { Match, MatchesApiResponse } from '../types/match.types';
+import type { Match, MatchParticipant, MatchesApiResponse } from '../types/match.types';
 
 type MatchesEnvelope<T> = {
   ok?: boolean;
@@ -23,8 +23,10 @@ export interface MatchCreateData {
 // POST /api/participaciones/inscribir body shape
 export interface JoinMatchData {
   idMatch: number;
-  equipo?: 'A' | 'B';
+  equipo?: MatchTeam;
 }
+
+export type MatchTeam = 'A' | 'B';
 
 // Response shape for GET /api/jugadores/:id/partidos
 interface PlayerMatchesResponse {
@@ -42,6 +44,10 @@ interface MatchParticipacion {
 interface MatchParticipacionesResponse {
   idMatch: number;
   participaciones: MatchParticipacion[];
+}
+
+interface MatchParticipantsResponse {
+  data?: MatchParticipant[];
 }
 
 export interface MatchParticipationSummary {
@@ -179,6 +185,14 @@ export const getMatchParticipations = async (idMatch: number): Promise<MatchPart
     idMatch,
     participaciones: payload.data?.participaciones ?? [],
   };
+};
+
+export const getMatchParticipants = async (idMatch: number): Promise<MatchParticipant[]> => {
+  const payload = await apiFetchJson<MatchParticipantsResponse>(`/partidos/${idMatch}/participantes`, {
+    auth: true,
+  });
+
+  return Array.isArray(payload.data) ? payload.data : [];
 };
 
 // 6. DELETE /api/partidos/:idMatch → cancel match (creator only)

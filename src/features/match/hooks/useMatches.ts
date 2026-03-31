@@ -2,14 +2,14 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { catalogosService } from '@/services/catalogos.service';
 import type { Match, MatchesState } from '../types/match.types';
-import { cancelMatch, getMatchParticipations, getMatches, getPlayerMatches, joinMatch, leaveMatch } from '../services/matches.service';
+import { cancelMatch, getMatchParticipations, getMatches, getPlayerMatches, joinMatch, leaveMatch, type MatchTeam } from '../services/matches.service';
 
 export interface UseMatchesResult {
   matchesData: MatchesState | null;
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
-  handleToggleParticipation: (matchId: number, isJoined: boolean) => Promise<void>;
+  handleToggleParticipation: (matchId: number, isJoined: boolean, equipo?: MatchTeam) => Promise<void>;
 }
 
 function buildMatchesState(
@@ -27,6 +27,7 @@ function buildMatchesState(
     idCreador: match.idCreador ?? match.creador?.idUser,
     lugar: match.lugar ?? lugarMap.get(match.idlugar ?? match.idLugar ?? -1) ?? 'Lugar desconocido',
     deporte: deporteMap.get(match.idDeporte) ?? `Deporte ${match.idDeporte}`,
+    numJugadores: match.numJugadores ?? match.participantesActuales ?? 0,
   });
 
   const normalizedPlayerMatches = playerMatches.map(normalizeMatch);
@@ -144,7 +145,7 @@ export const useMatches = (): UseMatchesResult => {
     loadMatches();
   }, [loadMatches]);
 
-  const handleToggleParticipation = async (matchId: number, isJoined: boolean) => {
+  const handleToggleParticipation = async (matchId: number, isJoined: boolean, equipo?: MatchTeam) => {
     if (!matchesData || !user) return;
 
     const sourceKey = isJoined ? 'mis_partidos' : 'disponibles';
@@ -179,12 +180,13 @@ export const useMatches = (): UseMatchesResult => {
           await leaveMatch(matchId, user.idUser);
         }
       } else {
-        await joinMatch({ idMatch: matchId });
+        await joinMatch({ idMatch: matchId, equipo: equipo ?? 'A' });
       }
     } catch (err: any) {
-      if (err.message === 'SESION_EXPIRADA') return;
+      if (err.message === 'SESION_EXPIRADA') throw err;
       setMatchesData(previousData);
       setError(err.message || 'No se pudo completar la acción. Inténtalo de nuevo.');
+      throw err;
     }
   };
 

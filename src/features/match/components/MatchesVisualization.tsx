@@ -2,15 +2,18 @@ import React, { useState } from "react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { Match } from "../types/match.types";
 import { useMatches } from "../hooks/useMatches";
+import type { MatchTeam } from "../services/matches.service";
 import MatchCard from "./MatchCard";
 import MatchModal from "./MatchModal";
+
+type MatchActionResult = "joined" | "left" | "cancelled";
 
 const MatchesVisualization: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
   const [activeTab, setActiveTab] = useState<"disponibles" | "mis_partidos">("disponibles");
 
   // 1. Hook de lógica de partidos (Trae datos, loading, error y funciones de acción)
-  const { matchesData, loading, error, handleToggleParticipation } = useMatches();
+  const { matchesData, loading, error, handleToggleParticipation, refetch } = useMatches();
 
   // Estados para el control de la Modal
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
@@ -38,19 +41,25 @@ const MatchesVisualization: React.FC = () => {
   };
 
   // --- LÓGICA DE CONFIRMACIÓN (UNIRSE / SALIR) ---
-  const handleConfirmProcess = async (matchId: number) => {
-    try {
-      // Usamos la función del hook que ya maneja la comunicación con el Backend
-      const isLeaving = activeTab === "mis_partidos";
-      await handleToggleParticipation(matchId, isLeaving);
-      
-      // Cerramos la modal solo si la operación fue exitosa
+  const handleConfirmProcess = async (matchId: number, equipo?: MatchTeam): Promise<MatchActionResult> => {
+    const currentMatch =
+      matchesData?.mis_partidos.find((match) => match.idMatch === matchId) ||
+      matchesData?.disponibles.find((match) => match.idMatch === matchId) ||
+      selectedMatch;
+
+    const isLeaving = Boolean(currentMatch?.isJoined);
+    const isCreator = currentMatch?.idCreador === user?.idUser;
+
+    await handleToggleParticipation(matchId, isLeaving, equipo);
+    await refetch();
+
+    if (isLeaving) {
       setIsModalOpen(false);
       setSelectedMatch(null);
-    } catch (err) {
-      // El error ya se maneja internamente en el hook, pero aquí cerramos la modal si falla la sesión
-      setIsModalOpen(false);
+      return isCreator ? "cancelled" : "left";
     }
+
+    return "joined";
   };
 
   // Determinamos qué lista mostrar según el Tab activo
@@ -58,6 +67,12 @@ const MatchesVisualization: React.FC = () => {
     activeTab === "disponibles"
       ? matchesData?.disponibles || []
       : matchesData?.mis_partidos || [];
+
+  const selectedMatchData = selectedMatch
+    ? [...(matchesData?.disponibles || []), ...(matchesData?.mis_partidos || [])].find(
+        (match) => match.idMatch === selectedMatch.idMatch
+      ) || selectedMatch
+    : null;
 
   return (
     <section className="w-full pt-8 pb-16 px-4 md:px-6 bg-[#0F172A] flex-grow flex flex-col items-center min-h-screen">
@@ -134,14 +149,14 @@ const MatchesVisualization: React.FC = () => {
         {/* --- MODAL DE DETALLE Y ACCIÓN --- */}
         <MatchModal
           isOpen={isModalOpen}
-          match={selectedMatch}
-          isJoined={activeTab === "mis_partidos"}
-          isCreator={selectedMatch?.idCreador === user?.idUser}
+          match={selectedMatchData}
+          isJoined={Boolean(selectedMatchData?.isJoined)}
+          isCreator={selectedMatchData?.idCreador === user?.idUser}
           onClose={() => {
             setIsModalOpen(false);
             setSelectedMatch(null);
           }}
-          onConfirmJoin={(id) => handleConfirmProcess(Number(id))} 
+          onConfirmJoin={(id, equipo) => handleConfirmProcess(Number(id), equipo)} 
         />
       </div>
     </section>
