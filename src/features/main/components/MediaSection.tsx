@@ -44,22 +44,19 @@ const MediaSection: React.FC<MediaSectionProps> = ({ className = '' }) => {
     {
       id: 'partidos',
       iconSrc: logoCalendario,
-      value: statusStats?.partidos ?? null,
-      label: 'Partidos registrados',
+      label: statusStats ? `${statusStats.partidos} Partidos registrados` : 'Partidos registrados',
       altText: 'Logo Partidos registrados',
     },
     {
       id: 'jugadores',
       iconSrc: logoIntegrantes,
-      value: jugadoresTotal,
-      label: 'Jugadores registrados',
+      label: jugadoresTotal !== null ? `${jugadoresTotal} Jugadores registrados` : 'Jugadores registrados',
       altText: 'Logo Jugadores registrados',
     },
     {
       id: 'deportes',
       iconSrc: logoDeportes,
-      value: statusStats?.deportes ?? null,
-      label: 'Deportes disponibles',
+      label: statusStats ? `${statusStats.deportes} Deportes disponibles` : 'Deportes disponibles',
       altText: 'Logo Deportes disponibles',
     },
   ];
@@ -72,7 +69,6 @@ const MediaSection: React.FC<MediaSectionProps> = ({ className = '' }) => {
             key={stat.id}
             id={stat.id}
             iconSrc={stat.iconSrc}
-            value={stat.value}
             label={stat.label}
             altText={stat.altText}
           />
