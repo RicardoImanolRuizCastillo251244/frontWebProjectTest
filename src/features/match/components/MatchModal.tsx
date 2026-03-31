@@ -123,6 +123,8 @@ const MatchModal: React.FC<MatchModalProps> = ({
   const teamCapacity = useMemo(() => Math.ceil((match?.maxJugadores ?? 0) / 2), [match?.maxJugadores]);
   const totalPlayers = participants.length || match?.numJugadores || 0;
   const statusMeta = getStatusMeta(match?.estado);
+  const isInProgress = match?.estado === 'en_curso';
+  const isFinalized = match?.estado === 'finalizado';
 
   useEffect(() => {
     if (isJoined || !selectedTeam) {
@@ -189,7 +191,24 @@ const MatchModal: React.FC<MatchModalProps> = ({
 
         {/* Cuerpo */}
         <div className="p-6 overflow-y-auto">
-          {!isJoined && (
+          {/* Banner según estado del partido */}
+          {isInProgress && (
+            <div className="mb-6 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-5 py-4">
+              <p className="text-[10px] uppercase tracking-[0.25em] text-amber-200 font-black mb-2">Partido en curso</p>
+              <h3 className="text-white text-lg font-black mb-2">No es posible inscribirse</h3>
+              <p className="text-sm text-white/70 leading-relaxed">Este partido ya se encuentra en curso; las inscripciones están cerradas.</p>
+            </div>
+          )}
+
+          {isFinalized && (
+            <div className="mb-6 rounded-2xl border border-slate-400/30 bg-slate-400/10 px-5 py-4">
+              <p className="text-[10px] uppercase tracking-[0.25em] text-slate-200 font-black mb-2">Partido finalizado</p>
+              <h3 className="text-white text-lg font-black mb-2">Solo visualización</h3>
+              <p className="text-sm text-white/70 leading-relaxed">Este partido ya finalizó. Puedes ver los detalles, pero no puedes interactuar ni modificar nada.</p>
+            </div>
+          )}
+
+          {!isJoined && !isInProgress && !isFinalized && (
             <div className="mb-6 rounded-2xl border border-[#71AB46]/25 bg-[#71AB46]/10 px-5 py-4">
               <p className="text-[10px] uppercase tracking-[0.25em] text-[#A8D68A] font-black mb-2">
                 Flujo de Inscripcion
@@ -309,13 +328,17 @@ const MatchModal: React.FC<MatchModalProps> = ({
                 );
 
                 if (!isJoined) {
+                  const disabledForState = isTeamFull || isInProgress || isFinalized;
                   return (
                     <button
                       key={team}
                       type="button"
-                      onClick={() => !isTeamFull && setSelectedTeam(team)}
-                      disabled={isTeamFull}
-                      className={cardBaseClass}
+                      onClick={() => {
+                        if (disabledForState) return;
+                        if (!isTeamFull) setSelectedTeam(team);
+                      }}
+                      disabled={disabledForState}
+                      className={`${cardBaseClass} ${disabledForState ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
                       {cardContent}
                     </button>
@@ -356,23 +379,52 @@ const MatchModal: React.FC<MatchModalProps> = ({
           {isJoined ? (
             <button 
               onClick={handlePrimaryAction}
-              disabled={actionLoading}
-              className="w-full bg-transparent border border-red-500/50 text-red-500 py-4 rounded-xl text-xs font-black uppercase tracking-[0.15em] hover:bg-red-500 hover:text-white transition-all shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={actionLoading || isFinalized}
+              className={`w-full bg-transparent border border-red-500/50 text-red-500 py-4 rounded-xl text-xs font-black uppercase tracking-[0.15em] hover:bg-red-500 hover:text-white transition-all shadow-lg ${actionLoading || isFinalized ? 'disabled:cursor-not-allowed disabled:opacity-50 opacity-70 cursor-not-allowed' : ''}`}
             >
               {actionLoading ? 'Procesando...' : isCreator ? 'Cancelar partido' : 'Cancelar mi asistencia'}
             </button>
           ) : (
-            <button 
-              onClick={handlePrimaryAction}
-              disabled={!selectedTeam || actionLoading}
-              className="w-full bg-[#71AB46] text-white py-4 rounded-xl text-xs font-black uppercase tracking-[0.15em] hover:bg-opacity-90 transition-all active:scale-[0.98] shadow-lg shadow-[#71AB46]/20 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {actionLoading
-                ? 'Procesando...'
-                : selectedTeam
-                  ? `Confirmar Asistencia en Equipo ${selectedTeam}`
-                  : 'Selecciona un equipo para continuar'}
-            </button>
+            (() => {
+              // Not joined primary action: respect match state
+              if (isFinalized) {
+                return (
+                  <button
+                    type="button"
+                    disabled
+                    className="w-full bg-slate-400/20 text-white py-4 rounded-xl text-xs font-black uppercase tracking-[0.15em] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Partido finalizado — solo visualización
+                  </button>
+                );
+              }
+
+              if (isInProgress) {
+                return (
+                  <button
+                    type="button"
+                    disabled
+                    className="w-full bg-amber-400/20 text-white py-4 rounded-xl text-xs font-black uppercase tracking-[0.15em] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Inscripciones cerradas — partido en curso
+                  </button>
+                );
+              }
+
+              return (
+                <button 
+                  onClick={handlePrimaryAction}
+                  disabled={!selectedTeam || actionLoading}
+                  className="w-full bg-[#71AB46] text-white py-4 rounded-xl text-xs font-black uppercase tracking-[0.15em] hover:bg-opacity-90 transition-all active:scale-[0.98] shadow-lg shadow-[#71AB46]/20 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {actionLoading
+                    ? 'Procesando...'
+                    : selectedTeam
+                      ? `Confirmar Asistencia en Equipo ${selectedTeam}`
+                      : 'Selecciona un equipo para continuar'}
+                </button>
+              );
+            })()
           )}
         </div>
       </div>
