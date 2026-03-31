@@ -9,33 +9,56 @@ import logoDeportes from '@/assets/images/deportes.png';
 
 interface JugadoresResponse {
   pagination?: { total: number };
+  data?: Array<unknown>;
 }
 
-interface StatusEstadisticas {
-  deportes: number;
-  partidos: number;
-}
-
-interface StatusResponse {
-  estadisticas?: StatusEstadisticas;
+interface ConteoResponse {
+  pagination?: { total: number };
+  data?: Array<unknown>;
 }
 
 const MediaSection: React.FC<MediaSectionProps> = ({ className = '' }) => {
   const [jugadoresTotal, setJugadoresTotal] = useState<number | null>(null);
-  const [statusStats, setStatusStats] = useState<StatusEstadisticas | null>(null);
+  const [deportesTotal, setDeportesTotal] = useState<number | null>(null);
+  const [partidosTotal, setPartidosTotal] = useState<number | null>(null);
 
   useEffect(() => {
     apiFetchJson<JugadoresResponse>('/jugadores/')
       .then((data) => {
-        if (data.pagination?.total !== undefined) {
+        if (typeof data.pagination?.total === 'number') {
           setJugadoresTotal(data.pagination.total);
+          return;
+        }
+
+        if (Array.isArray(data.data)) {
+          setJugadoresTotal(data.data.length);
         }
       })
       .catch(() => {});
 
-    apiFetchJson<StatusResponse>('/status')
+    apiFetchJson<ConteoResponse>('/deportes/')
       .then((data) => {
-        if (data.estadisticas) setStatusStats(data.estadisticas);
+        if (typeof data.pagination?.total === 'number') {
+          setDeportesTotal(data.pagination.total);
+          return;
+        }
+
+        if (Array.isArray(data.data)) {
+          setDeportesTotal(data.data.length);
+        }
+      })
+      .catch(() => {});
+
+    apiFetchJson<ConteoResponse>('/partidos/')
+      .then((data) => {
+        if (typeof data.pagination?.total === 'number') {
+          setPartidosTotal(data.pagination.total);
+          return;
+        }
+
+        if (Array.isArray(data.data)) {
+          setPartidosTotal(data.data.length);
+        }
       })
       .catch(() => {});
   }, []);
@@ -44,7 +67,7 @@ const MediaSection: React.FC<MediaSectionProps> = ({ className = '' }) => {
     {
       id: 'partidos',
       iconSrc: logoCalendario,
-      label: statusStats ? `${statusStats.partidos} Partidos registrados` : 'Partidos registrados',
+      label: partidosTotal !== null ? `${partidosTotal} Partidos registrados` : 'Partidos registrados',
       altText: 'Logo Partidos registrados',
     },
     {
@@ -56,7 +79,7 @@ const MediaSection: React.FC<MediaSectionProps> = ({ className = '' }) => {
     {
       id: 'deportes',
       iconSrc: logoDeportes,
-      label: statusStats ? `${statusStats.deportes} Deportes disponibles` : 'Deportes disponibles',
+      label: deportesTotal !== null ? `${deportesTotal} Deportes disponibles` : 'Deportes disponibles',
       altText: 'Logo Deportes disponibles',
     },
   ];
