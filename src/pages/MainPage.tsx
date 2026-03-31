@@ -3,6 +3,8 @@ import MainLayout from '../layouts/MainLayout';
 import { HeroMediaSection } from '../features/main/components';
 import { MatchesVisualization } from '../features/match';
 import CreateMatchModal from '../features/match/components/CreateMatchModal';
+// Socket demo (only enabled when VITE_ENABLE_SOCKET_DEMO=true)
+import SocketDemo from '../components/SocketDemo';
 
 const MainPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,6 +30,8 @@ const MainPage: React.FC = () => {
         onClose={() => setIsModalOpen(false)} 
         onSuccess={handleMatchCreated} // <--- Pasamos la prop requerida
       />
+
+      {import.meta.env.VITE_ENABLE_SOCKET_DEMO === 'true' && <SocketDemo />}
     </MainLayout>
   );
 };
