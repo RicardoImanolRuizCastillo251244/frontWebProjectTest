@@ -53,9 +53,10 @@ const MatchesVisualization: React.FC = () => {
     await handleToggleParticipation(matchId, isLeaving, equipo);
     await refetch();
 
+    setIsModalOpen(false);
+    setSelectedMatch(null);
+
     if (isLeaving) {
-      setIsModalOpen(false);
-      setSelectedMatch(null);
       return isCreator ? "cancelled" : "left";
     }
 

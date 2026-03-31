@@ -155,8 +155,8 @@ const MatchModal: React.FC<MatchModalProps> = ({
   if (!isOpen || !match) return null;
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 md:p-8 bg-slate-950/80 backdrop-blur-sm transition-all overflow-y-auto">
-      <div className="bg-[#0C2143] border border-white/10 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200 max-h-[78vh] my-auto">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 md:p-10 bg-slate-950/80 backdrop-blur-sm transition-all overflow-y-auto">
+      <div className="bg-[#0C2143] border border-white/10 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200 max-h-[70vh] my-auto">
         
         {/* Header */}
         <div className="sticky top-0 z-10 flex justify-between items-start p-6 border-b border-white/5 bg-[#0C2143]">
@@ -210,7 +210,7 @@ const MatchModal: React.FC<MatchModalProps> = ({
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)] gap-6 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-[180px_minmax(0,1fr)] gap-4 items-start">
             <div className="space-y-4">
               <div className="p-4 bg-white/5 rounded-xl">
                 <span className="text-[10px] text-white/50 uppercase font-bold tracking-widest block mb-1">Cupos</span>
@@ -242,7 +242,7 @@ const MatchModal: React.FC<MatchModalProps> = ({
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-3">
                 {[
                   { team: 'A' as MatchTeam, players: teamAPlayers },
                   { team: 'B' as MatchTeam, players: teamBPlayers },
@@ -265,16 +265,15 @@ const MatchModal: React.FC<MatchModalProps> = ({
                     } ${!isJoined && !isTeamFull ? 'hover:border-white/30' : ''}`}
                   >
                     {isSelectedTeam && !isJoined && <div className="h-1.5 w-full bg-[#71AB46]" />}
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+                    <div className="flex items-start justify-between gap-3 px-4 py-3 border-b border-white/5">
                       <div>
                         <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Equipo</p>
                         <p className="text-white text-lg font-black mt-1">{team}</p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right shrink-0">
                         {isSelectedTeam && !isJoined && (
-                          <span className="inline-flex items-center gap-1 rounded-full border border-[#71AB46]/40 bg-[#71AB46]/15 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-[#A8D68A] mb-2">
+                          <span className="inline-flex items-center justify-center rounded-full border border-[#71AB46]/40 bg-[#71AB46]/15 w-6 h-6 text-[12px] font-black text-[#A8D68A] mb-2">
                             <span>✓</span>
-                            <span>Seleccionado</span>
                           </span>
                         )}
                         <p className="text-[10px] uppercase tracking-[0.2em] text-white/30">Jugadores</p>
@@ -285,7 +284,7 @@ const MatchModal: React.FC<MatchModalProps> = ({
                     {!isJoined && (
                       <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02]">
                         <p className="text-[10px] uppercase tracking-[0.2em] text-white/35 mb-1">Seleccion</p>
-                        <p className={`text-sm font-semibold ${isSelectedTeam ? 'text-[#A8D68A]' : isTeamFull ? 'text-red-300' : 'text-white/75'}`}>
+                        <p className={`text-xs font-semibold leading-relaxed ${isSelectedTeam ? 'text-[#A8D68A]' : isTeamFull ? 'text-red-300' : 'text-white/75'}`}>
                           {isTeamFull
                             ? 'Equipo lleno'
                             : isSelectedTeam
