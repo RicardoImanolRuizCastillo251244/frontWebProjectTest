@@ -203,8 +203,12 @@ const MatchModal: React.FC<MatchModalProps> = ({
           {isFinalized && (
             <div className="mb-6 rounded-2xl border border-slate-400/30 bg-slate-400/10 px-5 py-4">
               <p className="text-[10px] uppercase tracking-[0.25em] text-slate-200 font-black mb-2">Partido finalizado</p>
-              <h3 className="text-white text-lg font-black mb-2">Solo visualización</h3>
-              <p className="text-sm text-white/70 leading-relaxed">Este partido ya finalizó. Puedes ver los detalles, pero no puedes interactuar ni modificar nada.</p>
+              <h3 className="text-white text-lg font-black mb-2">{isCreator ? 'Finalizado — acciones del creador' : 'Solo visualización'}</h3>
+              <p className="text-sm text-white/70 leading-relaxed">
+                {isCreator
+                  ? 'Este partido ya finalizó. Como creador puedes eliminarlo si lo deseas.'
+                  : 'Este partido ya finalizó. Puedes ver los detalles, pero no puedes interactuar ni modificar nada.'}
+              </p>
             </div>
           )}
 
@@ -379,10 +383,10 @@ const MatchModal: React.FC<MatchModalProps> = ({
           {isJoined ? (
             <button 
               onClick={handlePrimaryAction}
-              disabled={actionLoading || isFinalized}
-              className={`w-full bg-transparent border border-red-500/50 text-red-500 py-4 rounded-xl text-xs font-black uppercase tracking-[0.15em] hover:bg-red-500 hover:text-white transition-all shadow-lg ${actionLoading || isFinalized ? 'disabled:cursor-not-allowed disabled:opacity-50 opacity-70 cursor-not-allowed' : ''}`}
+              disabled={actionLoading || (isFinalized && !isCreator)}
+              className={`w-full bg-transparent border border-red-500/50 text-red-500 py-4 rounded-xl text-xs font-black uppercase tracking-[0.15em] hover:bg-red-500 hover:text-white transition-all shadow-lg ${actionLoading || (isFinalized && !isCreator) ? 'disabled:cursor-not-allowed disabled:opacity-50 opacity-70 cursor-not-allowed' : ''}`}
             >
-              {actionLoading ? 'Procesando...' : isCreator ? 'Cancelar partido' : 'Cancelar mi asistencia'}
+              {actionLoading ? 'Procesando...' : isCreator ? (isFinalized ? 'Eliminar partido' : 'Cancelar partido') : 'Cancelar mi asistencia'}
             </button>
           ) : (
             (() => {
