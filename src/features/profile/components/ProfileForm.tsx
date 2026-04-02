@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface ProfileFormData {
   username: string;
@@ -14,7 +14,7 @@ interface ProfileFormProps {
   successSignal?: number;
 }
 
-const ProfileForm: React.FC<ProfileFormProps> = ({ initialUsername, email, onSubmit }) => {
+const ProfileForm: React.FC<ProfileFormProps> = ({ initialUsername, email, onSubmit, saving = false, successSignal }) => {
   // Estados locales solo para el formulario
   const [username, setUsername] = useState(initialUsername);
   const [contrasenaActual, setContrasenaActual] = useState('');
@@ -66,20 +66,12 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialUsername, email, onSub
   };
 
   // Cuando el padre indica éxito, limpiamos los campos de contraseña
-  React.useEffect(() => {
+  useEffect(() => {
     if (typeof successSignal !== 'undefined') {
       setContrasenaActual('');
       setContrasenaNueva('');
     }
   }, [successSignal]);
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      setErrors({});
-      if (!validate()) return;
-
-      // Le pasamos los datos al componente padre
-      onSubmit({ username: username.trim(), contrasenaActual: contrasenaActual || undefined, contrasenaNueva: contrasenaNueva || undefined });
-    };
 
   return (
     <div className="bg-[#0C2143] border border-white/10 rounded-xl p-6 md:p-8 shadow-lg mt-4">
