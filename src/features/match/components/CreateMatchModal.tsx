@@ -27,7 +27,8 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
     hora: '',
     idLugar: '',
     maxJugadores: '',
-    equipoCreador: 'A' as 'A' | 'B'
+    equipoCreador: 'A' as 'A' | 'B',
+    descripcion: ''
   });
 
   const [deportes, setDeportes] = useState<Deporte[]>([]);
@@ -59,7 +60,7 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
 
   if (!isOpen) return null;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -79,6 +80,8 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
         idLugar: Number(formData.idLugar),
         maxJugadores: Number(formData.maxJugadores),
         equipoCreador: formData.equipoCreador
+          ,
+          descripcion: formData.descripcion || undefined
       };
 
       const created = await createMatch(payload);
@@ -90,7 +93,7 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
 
       onSuccess(); 
       onClose();   
-      setFormData({ idDeporte: '', fecha: '', hora: '', idLugar: '', maxJugadores: '', equipoCreador: 'A' });
+      setFormData({ idDeporte: '', fecha: '', hora: '', idLugar: '', maxJugadores: '', equipoCreador: 'A', descripcion: '' });
     } catch (err: any) {
       if (err.message !== 'SESION_EXPIRADA') {
         setError(err.message || 'Error al crear el partido');
@@ -130,6 +133,18 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
                 </option>
               ))}
             </select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-white/40 text-[10px] font-bold uppercase">Descripción (opcional)</label>
+            <textarea
+              name="descripcion"
+              value={formData.descripcion}
+              onChange={handleChange}
+              className="bg-transparent border border-white/20 p-3 text-white outline-none focus:border-white resize-none h-24"
+              maxLength={1000}
+              placeholder="Opcional: añade detalles o reglas del partido"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">

@@ -18,6 +18,7 @@ export interface MatchCreateData {
   idLugar: number;
   maxJugadores: number;
   equipoCreador: 'A' | 'B';
+  descripcion?: string;
 }
 
 // POST /api/participaciones/inscribir body shape
