@@ -27,3 +27,25 @@ export const getUserProfile = async (): Promise<UserProfile> => {
     stats: data.stats || { played: 0, won: 0, lost: 0 } // Por si tu API aún no tiene stats
   };
 };
+
+// PATCH /jugadores/perfil -> actualizar nombre de usuario (nombreUsuario)
+export const updateUserProfile = async (payload: { nombreUsuario: string }) => {
+  const res = await apiFetchJson<any>('/jugadores/perfil', {
+    method: 'PATCH',
+    auth: true,
+    body: JSON.stringify(payload),
+  });
+
+  return res;
+};
+
+// PATCH /jugadores/contrasena -> cambiar contraseña
+export const changePassword = async (payload: { contrasenaActual: string; contrasenaNueva: string }) => {
+  const res = await apiFetchJson<any>('/jugadores/contrasena', {
+    method: 'PATCH',
+    auth: true,
+    body: JSON.stringify(payload),
+  });
+
+  return res;
+};
