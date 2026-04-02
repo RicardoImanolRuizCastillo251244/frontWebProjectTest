@@ -48,6 +48,7 @@ export interface Match {
 export interface MatchesState {
   disponibles: Match[];
   mis_partidos: Match[];
+  finalizados?: Match[];
 }
 
 /**

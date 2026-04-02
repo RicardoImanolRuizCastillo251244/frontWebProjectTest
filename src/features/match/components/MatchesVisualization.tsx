@@ -10,7 +10,7 @@ type MatchActionResult = "joined" | "left" | "cancelled";
 
 const MatchesVisualization: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
-  const [activeTab, setActiveTab] = useState<"disponibles" | "mis_partidos">("disponibles");
+  const [activeTab, setActiveTab] = useState<"disponibles" | "mis_partidos" | "finalizados">("disponibles");
 
   // 1. Hook de lógica de partidos (Trae datos, loading, error y funciones de acción)
   const { matchesData, loading, error, handleToggleParticipation, refetch } = useMatches();
@@ -26,10 +26,12 @@ const MatchesVisualization: React.FC = () => {
 
   // --- MANEJADOR PARA ABRIR MODAL ---
   const handleMatchAction = (matchId: number) => {
-    const currentMatches =
-      activeTab === "disponibles"
-        ? matchesData?.disponibles || []
-        : matchesData?.mis_partidos || [];
+  const currentMatches =
+    activeTab === 'disponibles'
+      ? matchesData?.disponibles || []
+      : activeTab === 'mis_partidos'
+        ? matchesData?.mis_partidos || []
+        : matchesData?.finalizados || [];
 
     // Buscamos el partido específico por su ID
     const match = currentMatches.find((m) => m.idMatch === matchId);
@@ -70,7 +72,7 @@ const MatchesVisualization: React.FC = () => {
       : matchesData?.mis_partidos || [];
 
   const selectedMatchData = selectedMatch
-    ? [...(matchesData?.disponibles || []), ...(matchesData?.mis_partidos || [])].find(
+    ? [...(matchesData?.disponibles || []), ...(matchesData?.mis_partidos || []), ...(matchesData?.finalizados || [])].find(
         (match) => match.idMatch === selectedMatch.idMatch
       ) || selectedMatch
     : null;
@@ -109,6 +111,16 @@ const MatchesVisualization: React.FC = () => {
           >
             Mis partidos
           </button>
+          <button
+            onClick={() => setActiveTab('finalizados')}
+            className={`flex-1 text-center py-2.5 px-4 rounded-[50px] font-roboto font-normal text-sm md:text-base transition-all duration-300 ${
+              activeTab === 'finalizados'
+                ? 'bg-[#0D3472] text-white shadow-lg'
+                : 'text-white/60 hover:text-white/90'
+            }`}
+          >
+            Finalizados
+          </button>
         </div>
 
         {/* --- ESTADOS DE CARGA --- */}
@@ -142,11 +154,13 @@ const MatchesVisualization: React.FC = () => {
                   key={match.idMatch}
                   match={match}
                   actionText={
-                    activeTab === "disponibles"
-                      ? "Ver y elegir equipo"
-                      : match.idCreador === user?.idUser
-                        ? "Ver / Gestionar"
-                        : "Ver / Cancelar"
+                    activeTab === 'disponibles'
+                      ? 'Ver y elegir equipo'
+                      : activeTab === 'mis_partidos'
+                        ? match.idCreador === user?.idUser
+                          ? 'Ver / Gestionar'
+                          : 'Ver / Cancelar'
+                        : 'Ver'
                   }
                   onActionClick={handleMatchAction}
                 />

@@ -59,9 +59,14 @@ function buildMatchesState(
     }
   });
 
+  const finalizados = enriched.filter(match => match.estado === 'finalizado');
+  const disponibles = enriched.filter(match => !match.isJoined && match.estado !== 'finalizado');
+  const mis_partidos = Array.from(myMatchesMap.values()).filter(m => m.estado !== 'finalizado');
+
   return {
-    disponibles: enriched.filter(match => !match.isJoined),
-    mis_partidos: Array.from(myMatchesMap.values()),
+    disponibles,
+    mis_partidos,
+    finalizados,
   };
 }
 
