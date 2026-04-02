@@ -75,6 +75,14 @@ const MatchesVisualization: React.FC = () => {
       ) || selectedMatch
     : null;
 
+  // Si el partido seleccionado ya no existe en los datos (por ejemplo fue eliminado), cerramos la modal automáticamente.
+  React.useEffect(() => {
+    if (isModalOpen && selectedMatch && !selectedMatchData) {
+      setIsModalOpen(false);
+      setSelectedMatch(null);
+    }
+  }, [isModalOpen, selectedMatch, selectedMatchData]);
+
   return (
     <section className="w-full pt-8 pb-16 px-4 md:px-6 bg-[#0F172A] flex-grow flex flex-col items-center min-h-screen">
       <div className="max-w-7xl w-full mx-auto flex flex-col items-center">

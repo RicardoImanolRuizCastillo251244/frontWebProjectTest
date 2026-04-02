@@ -168,7 +168,12 @@ export const useMatches = (): UseMatchesResult => {
       await loadMatches();
     };
 
+    const onPartidoCanceladoWindow = async (e: any) => {
+      await loadMatches();
+    };
+
     window.addEventListener('partidoCreado', onPartidoCreado as EventListener);
+    window.addEventListener('partidoCancelado', onPartidoCanceladoWindow as EventListener);
 
     return () => {
       offPartidos();
@@ -179,6 +184,7 @@ export const useMatches = (): UseMatchesResult => {
         socket && socket.off && socket.off('partidosEstadoActualizado');
       } catch (e) {}
       window.removeEventListener('partidoCreado', onPartidoCreado as EventListener);
+      window.removeEventListener('partidoCancelado', onPartidoCanceladoWindow as EventListener);
     };
   }, [user, loadMatches]);
 
@@ -213,6 +219,9 @@ export const useMatches = (): UseMatchesResult => {
       if (isJoined) {
         if (isCreator) {
           await cancelMatch(matchId);
+          try {
+            window.dispatchEvent(new CustomEvent('partidoCancelado', { detail: { idMatch: matchId } }));
+          } catch (e) {}
         } else {
           await leaveMatch(matchId, user.idUser);
         }
