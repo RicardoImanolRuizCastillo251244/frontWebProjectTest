@@ -104,16 +104,16 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-3">
       <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative bg-[#0F172A] border-2 border-white p-8 w-full max-w-lg shadow-2xl">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-white text-2xl font-bold uppercase tracking-widest">Crear Partido</h2>
-          <button onClick={onClose} className="text-white text-4xl hover:scale-110 transition-transform">&times;</button>
+      <div className="relative bg-[#0F172A] border-2 border-white p-4 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto rounded-lg">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-white text-lg font-bold uppercase tracking-wide">Crear Partido</h2>
+          <button onClick={onClose} className="text-white text-2xl hover:scale-105 transition-transform">&times;</button>
         </div>
         
-        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+        <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
           {error && <p className="text-red-500 text-[10px] font-bold uppercase bg-red-500/10 p-2">{error}</p>}
 
           {/* SELECT DE DEPORTES */}
@@ -123,7 +123,7 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
               name="idDeporte"
               value={formData.idDeporte}
               onChange={handleChange}
-              className="bg-transparent border border-white/20 p-3 text-white outline-none focus:border-white cursor-pointer"
+              className="bg-transparent border border-white/20 p-2 text-white text-sm outline-none focus:border-white cursor-pointer"
               required
             >
               <option value="" className="bg-[#0F172A]">Selecciona deporte</option>
@@ -141,7 +141,7 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
               name="descripcion"
               value={formData.descripcion}
               onChange={handleChange}
-              className="bg-transparent border border-white/20 p-3 text-white outline-none focus:border-white resize-none h-24"
+              className="bg-transparent border border-white/20 p-2 text-white text-sm outline-none focus:border-white resize-none h-20"
               maxLength={1000}
               placeholder="Opcional: añade detalles o reglas del partido"
             />
@@ -150,12 +150,12 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
           <div className="grid grid-cols-2 gap-4">
             <input 
               name="fecha" type="date" value={formData.fecha} onChange={handleChange}
-              className="bg-transparent border border-white/20 p-3 text-white outline-none focus:border-white"
+              className="bg-transparent border border-white/20 p-2 text-white text-sm outline-none focus:border-white"
               required
             />
             <input 
               name="hora" type="time" value={formData.hora} onChange={handleChange}
-              className="bg-transparent border border-white/20 p-3 text-white outline-none focus:border-white"
+              className="bg-transparent border border-white/20 p-2 text-white text-sm outline-none focus:border-white"
               required
             />
           </div>
@@ -167,7 +167,7 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
               name="idLugar"
               value={formData.idLugar}
               onChange={handleChange}
-              className="bg-transparent border border-white/20 p-3 text-white outline-none focus:border-white cursor-pointer"
+              className="bg-transparent border border-white/20 p-2 text-white text-sm outline-none focus:border-white cursor-pointer"
               required
             >
               <option value="" className="bg-[#0F172A]">Selecciona ubicación</option>
@@ -184,7 +184,7 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
             <input 
               name="maxJugadores" type="number" value={formData.maxJugadores}
               onChange={handleChange} min="2"
-              className="bg-transparent border border-white/20 p-3 text-white outline-none focus:border-white" 
+              className="bg-transparent border border-white/20 p-2 text-white text-sm outline-none focus:border-white" 
               required
             />
           </div>
@@ -195,7 +195,7 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
               name="equipoCreador"
               value={formData.equipoCreador}
               onChange={handleChange}
-              className="bg-transparent border border-white/20 p-3 text-white outline-none focus:border-white cursor-pointer"
+              className="bg-transparent border border-white/20 p-2 text-white text-sm outline-none focus:border-white cursor-pointer"
               required
             >
               <option value="A" className="bg-[#0F172A]">Equipo A</option>
@@ -205,7 +205,7 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ isOpen, onClose, on
           
           <button 
             type="submit" disabled={loading}
-            className="bg-white text-[#0F172A] font-bold py-5 mt-4 uppercase tracking-[0.2em] hover:bg-slate-200 disabled:opacity-50"
+            className="bg-white text-[#0F172A] font-bold py-2 px-4 mt-3 text-sm uppercase tracking-wider hover:bg-slate-200 disabled:opacity-50"
           >
             {loading ? 'Publicando...' : 'Publicar Partido'}
           </button>
