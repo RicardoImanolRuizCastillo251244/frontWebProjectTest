@@ -196,6 +196,21 @@ export const getMatchParticipants = async (idMatch: number): Promise<MatchPartic
   return Array.isArray(payload.data) ? payload.data : [];
 };
 
+// 7. GET /api/partidos/usuario/:idUser/creados → matches created by user
+export const getCreatedMatches = async (idUser: number): Promise<Match[]> => {
+  try {
+    const payload = await apiFetchJson<Match[] | MatchesEnvelope<Match[]>>(
+      `/partidos/usuario/${idUser}/creados`,
+      { auth: true }
+    );
+    return normalizeMatchesArray(payload);
+  } catch (error: any) {
+    if (error?.message === 'SESION_EXPIRADA') throw error;
+    // If the endpoint fails, return empty and let caller fallback to filtering all matches
+    return [];
+  }
+};
+
 // 6. DELETE /api/partidos/:idMatch → cancel match (creator only)
 export const cancelMatch = async (idMatch: number, motivoCancelacion?: string): Promise<void> => {
   await apiFetchJson(`/partidos/${idMatch}`, {

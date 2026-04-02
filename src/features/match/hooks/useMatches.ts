@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { catalogosService } from '@/services/catalogos.service';
 import type { Match, MatchesState } from '../types/match.types';
-import { cancelMatch, getMatchParticipations, getMatches, getPlayerMatches, joinMatch, leaveMatch, type MatchTeam } from '../services/matches.service';
+import { cancelMatch, getMatchParticipations, getMatches, getPlayerMatches, getCreatedMatches, joinMatch, leaveMatch, type MatchTeam } from '../services/matches.service';
 import { connectSocket, onEvento } from '@/services/socket';
 
 export interface UseMatchesResult {
@@ -16,6 +16,7 @@ export interface UseMatchesResult {
 function buildMatchesState(
   allMatches: Match[],
   playerMatches: Match[],
+  createdMatches: Match[],
   deportes: { idDeporte: number; nombreDeporte: string }[],
   lugares: { idLugar: number; nombre: string }[],
   currentUserId: number
@@ -32,11 +33,13 @@ function buildMatchesState(
   });
 
   const normalizedPlayerMatches = playerMatches.map(normalizeMatch);
+  const normalizedCreatedMatches = createdMatches.map(normalizeMatch);
   const playerMatchIds = new Set(normalizedPlayerMatches.map(match => match.idMatch));
+  const createdMatchIds = new Set(normalizedCreatedMatches.map(match => match.idMatch));
 
   const enriched = allMatches.map(match => {
     const normalizedMatch = normalizeMatch(match);
-    const isCreatedByUser = normalizedMatch.idCreador === currentUserId;
+    const isCreatedByUser = createdMatchIds.has(normalizedMatch.idMatch) || normalizedMatch.idCreador === currentUserId;
 
     return {
       ...normalizedMatch,
@@ -45,6 +48,14 @@ function buildMatchesState(
   });
 
   const myMatchesMap = new Map<number, Match>();
+
+  // Start from created matches and player matches so both appear in `mis_partidos`
+  normalizedCreatedMatches.forEach(match => {
+    myMatchesMap.set(match.idMatch, {
+      ...match,
+      isJoined: true,
+    });
+  });
 
   normalizedPlayerMatches.forEach(match => {
     myMatchesMap.set(match.idMatch, {
@@ -59,8 +70,8 @@ function buildMatchesState(
     }
   });
 
-  const finalizados = enriched.filter(match => match.estado === 'finalizado');
-  const disponibles = enriched.filter(match => !match.isJoined && match.estado === 'programado');
+  const finalizados = enriched.filter(match => match.estado === 'finalizado' && (playerMatchIds.has(match.idMatch) || createdMatchIds.has(match.idMatch)));
+  const disponibles = enriched.filter(match => !playerMatchIds.has(match.idMatch) && !createdMatchIds.has(match.idMatch) && match.estado === 'programado');
   const mis_partidos = Array.from(myMatchesMap.values()).filter(m => m.estado !== 'finalizado');
 
   return {
@@ -81,9 +92,10 @@ export const useMatches = (): UseMatchesResult => {
     try {
       setLoading(true);
       setError(null);
-      const [allMatchesResult, playerMatchesResult, deportesResult, lugaresResult] = await Promise.allSettled([
+      const [allMatchesResult, playerMatchesResult, createdMatchesResult, deportesResult, lugaresResult] = await Promise.allSettled([
         getMatches(),
         getPlayerMatches(user.idUser),
+        getCreatedMatches(user.idUser),
         catalogosService.getDeportes(),
         catalogosService.getLugares(),
       ]);
@@ -104,6 +116,7 @@ export const useMatches = (): UseMatchesResult => {
       const deportes = deportesResult.value;
       const lugares = lugaresResult.value;
       let playerMatches = playerMatchesResult.status === 'fulfilled' ? playerMatchesResult.value : [];
+      let createdMatches = createdMatchesResult.status === 'fulfilled' ? createdMatchesResult.value : [];
 
       if (playerMatchesResult.status === 'rejected') {
         const reasonMessage = playerMatchesResult.reason?.message || '';
@@ -138,7 +151,17 @@ export const useMatches = (): UseMatchesResult => {
         setError('No se pudo cargar la lista de partidos donde participas. Puedes ver los partidos disponibles.');
       }
 
-      setMatchesData(buildMatchesState(allMatches, playerMatches, deportes, lugares, user.idUser));
+      // If fetching created matches failed (non-fatal), fallback to inferring from allMatches
+      if (createdMatchesResult.status === 'rejected') {
+        const reasonMessage = createdMatchesResult.reason?.message || '';
+        if (reasonMessage === 'SESION_EXPIRADA') {
+          throw createdMatchesResult.reason;
+        }
+
+        createdMatches = allMatches.filter((m) => (m.idCreador ?? m.creador?.idUser) === user.idUser);
+      }
+
+      setMatchesData(buildMatchesState(allMatches, playerMatches, createdMatches, deportes, lugares, user.idUser));
     } catch (err: any) {
       if (err.message === 'SESION_EXPIRADA') return;
       setError(err.message || 'Error al cargar los partidos');
