@@ -143,31 +143,46 @@ const MatchesVisualization: React.FC = () => {
         {/* --- GRID DE PARTIDOS --- */}
         {!loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {currentMatches.length === 0 ? (
-              <div className="col-span-full py-20 flex flex-col items-center opacity-40">
-                <span className="text-5xl mb-4">🏟️</span>
-                <p className="text-white font-roboto text-center uppercase tracking-widest text-sm">
-                  No hay partidos en esta sección
-                </p>
-              </div>
-            ) : (
-              currentMatches.map((match) => (
-                <MatchCard
-                  key={match.idMatch}
-                  match={match}
-                  actionText={
-                    activeTab === 'disponibles'
-                      ? 'Ver y elegir equipo'
-                      : activeTab === 'mis_partidos'
-                        ? match.idCreador === user?.idUser
-                          ? 'Ver / Gestionar'
-                          : 'Ver / Cancelar'
-                        : 'Ver'
-                  }
-                  onActionClick={handleMatchAction}
-                />
-              ))
-            )}
+            {
+              (() => {
+                let displayedMatches = currentMatches || [];
+                if (activeTab === 'disponibles') {
+                  displayedMatches = displayedMatches.filter(m => m.estado === 'programado');
+                } else if (activeTab === 'mis_partidos') {
+                  displayedMatches = displayedMatches.filter(m => m.estado !== 'finalizado');
+                } else if (activeTab === 'finalizados') {
+                  displayedMatches = displayedMatches.filter(m => m.estado === 'finalizado');
+                }
+
+                if (displayedMatches.length === 0) {
+                  return (
+                    <div className="col-span-full py-20 flex flex-col items-center opacity-40">
+                      <span className="text-5xl mb-4">🏟️</span>
+                      <p className="text-white font-roboto text-center uppercase tracking-widest text-sm">
+                        No hay partidos en esta sección
+                      </p>
+                    </div>
+                  );
+                }
+
+                return displayedMatches.map((match) => (
+                  <MatchCard
+                    key={match.idMatch}
+                    match={match}
+                    actionText={
+                      activeTab === 'disponibles'
+                        ? 'Ver y elegir equipo'
+                        : activeTab === 'mis_partidos'
+                          ? match.idCreador === user?.idUser
+                            ? 'Ver / Gestionar'
+                            : 'Ver / Cancelar'
+                          : 'Ver'
+                    }
+                    onActionClick={handleMatchAction}
+                  />
+                ));
+              })()
+            }
           </div>
         )}
 
