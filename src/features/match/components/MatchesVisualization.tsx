@@ -87,6 +87,30 @@ const MatchesVisualization: React.FC = () => {
     }
   }, [isModalOpen, selectedMatch, selectedMatchData]);
 
+  // PAGINACIÓN
+  const [page, setPage] = React.useState<number>(1);
+  const PAGE_SIZE = 6;
+
+  React.useEffect(() => {
+    // Reset page when tab or matches change
+    setPage(1);
+  }, [activeTab, matchesData]);
+
+  const filteredMatches = React.useMemo(() => {
+    let list = currentMatches || [];
+    if (activeTab === 'disponibles') {
+      list = list.filter(m => m.estado === 'programado');
+    } else if (activeTab === 'mis_partidos') {
+      list = list.filter(m => m.estado !== 'finalizado');
+    } else if (activeTab === 'finalizados') {
+      list = list.filter(m => m.estado === 'finalizado');
+    }
+    return list;
+  }, [currentMatches, activeTab]);
+
+  const totalPages = Math.max(1, Math.ceil((filteredMatches?.length || 0) / PAGE_SIZE));
+  const pagedMatches = (filteredMatches || []).slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   return (
     <section className="w-full pt-8 pb-16 px-4 md:px-6 bg-[#0F172A] flex-grow flex flex-col items-center min-h-screen">
       <div className="max-w-7xl w-full mx-auto flex flex-col items-center">
@@ -142,30 +166,15 @@ const MatchesVisualization: React.FC = () => {
 
         {/* --- GRID DE PARTIDOS --- */}
         {!loading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {
-              (() => {
-                let displayedMatches = currentMatches || [];
-                if (activeTab === 'disponibles') {
-                  displayedMatches = displayedMatches.filter(m => m.estado === 'programado');
-                } else if (activeTab === 'mis_partidos') {
-                  displayedMatches = displayedMatches.filter(m => m.estado !== 'finalizado');
-                } else if (activeTab === 'finalizados') {
-                  displayedMatches = displayedMatches.filter(m => m.estado === 'finalizado');
-                }
-
-                if (displayedMatches.length === 0) {
-                  return (
-                    <div className="col-span-full py-20 flex flex-col items-center opacity-40">
-                      <span className="text-5xl mb-4">🏟️</span>
-                      <p className="text-white font-roboto text-center uppercase tracking-widest text-sm">
-                        No hay partidos en esta sección
-                      </p>
-                    </div>
-                  );
-                }
-
-                return displayedMatches.map((match) => (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {pagedMatches.length === 0 ? (
+                <div className="col-span-full py-20 flex flex-col items-center opacity-40">
+                  <span className="text-5xl mb-4">🏟️</span>
+                  <p className="text-white font-roboto text-center uppercase tracking-widest text-sm">No hay partidos en esta sección</p>
+                </div>
+              ) : (
+                pagedMatches.map((match) => (
                   <MatchCard
                     key={match.idMatch}
                     match={match}
@@ -180,10 +189,41 @@ const MatchesVisualization: React.FC = () => {
                     }
                     onActionClick={handleMatchAction}
                   />
-                ));
-              })()
-            }
-          </div>
+                ))
+              )}
+            </div>
+
+            {/* Pagination controls */}
+            {totalPages > 1 && (
+              <div className="w-full max-w-2xl mt-6 flex items-center justify-center gap-3">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-3 py-1 rounded bg-white/5 text-white/80 disabled:opacity-40"
+                >
+                  Prev
+                </button>
+
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setPage(i + 1)}
+                    className={`px-3 py-1 rounded ${page === i + 1 ? 'bg-[#0D3472] text-white' : 'bg-white/5 text-white/80'}`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="px-3 py-1 rounded bg-white/5 text-white/80 disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         )}
 
         {/* --- MODAL DE DETALLE Y ACCIÓN --- */}
