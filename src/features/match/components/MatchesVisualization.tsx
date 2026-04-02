@@ -180,6 +180,8 @@ const MatchesVisualization: React.FC = () => {
           onClose={() => {
             setIsModalOpen(false);
             setSelectedMatch(null);
+            // Refrescar partidos al cerrar la modal (por si hubo error o cambio de estado)
+            refetch();
           }}
           onConfirmJoin={(id, equipo) => handleConfirmProcess(Number(id), equipo)} 
         />

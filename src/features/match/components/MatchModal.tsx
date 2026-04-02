@@ -52,6 +52,7 @@ const MatchModal: React.FC<MatchModalProps> = ({
   const [loadingParticipants, setLoadingParticipants] = useState(false);
   const [participantsError, setParticipantsError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const loadParticipants = async (matchId: number) => {
     setLoadingParticipants(true);
@@ -143,12 +144,15 @@ const MatchModal: React.FC<MatchModalProps> = ({
     }
 
     setActionLoading(true);
-
+    setActionError(null);
     try {
       const result = await onConfirmJoin(match.idMatch, selectedTeam || undefined);
       if (result === 'joined') {
         await loadParticipants(match.idMatch);
       }
+    } catch (err: any) {
+      const msg = err?.message || String(err) || 'Error al procesar la acción';
+      setActionError(msg);
     } finally {
       setActionLoading(false);
     }
@@ -191,6 +195,11 @@ const MatchModal: React.FC<MatchModalProps> = ({
 
         {/* Cuerpo */}
         <div className="p-6 overflow-y-auto">
+          {actionError && (
+            <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+              {actionError}
+            </div>
+          )}
           {/* Banner según estado del partido */}
           {isInProgress && (
             <div className="mb-6 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-5 py-4">
