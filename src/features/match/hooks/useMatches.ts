@@ -60,7 +60,7 @@ function buildMatchesState(
   });
 
   const finalizados = enriched.filter(match => match.estado === 'finalizado');
-  const disponibles = enriched.filter(match => !match.isJoined && match.estado !== 'finalizado');
+  const disponibles = enriched.filter(match => !match.isJoined && match.estado === 'programado');
   const mis_partidos = Array.from(myMatchesMap.values()).filter(m => m.estado !== 'finalizado');
 
   return {
