@@ -67,9 +67,11 @@ const MatchesVisualization: React.FC = () => {
 
   // Determinamos qué lista mostrar según el Tab activo
   const currentMatches =
-    activeTab === "disponibles"
+    activeTab === 'disponibles'
       ? matchesData?.disponibles || []
-      : matchesData?.mis_partidos || [];
+      : activeTab === 'mis_partidos'
+        ? matchesData?.mis_partidos || []
+        : matchesData?.finalizados || [];
 
   const selectedMatchData = selectedMatch
     ? [...(matchesData?.disponibles || []), ...(matchesData?.mis_partidos || []), ...(matchesData?.finalizados || [])].find(
@@ -90,7 +92,7 @@ const MatchesVisualization: React.FC = () => {
       <div className="max-w-7xl w-full mx-auto flex flex-col items-center">
         
         {/* --- SELECTOR DE TABS (ESTILO NAVEGACIÓN) --- */}
-        <div className="bg-[#0C2143] rounded-[50px] p-1.5 flex items-center w-full max-w-sm md:max-w-md mx-auto mb-12 border border-white/5 shadow-2xl">
+        <div className="bg-[#0C2143] rounded-[50px] p-1.5 flex items-center w-full max-w-2xl md:max-w-3xl mx-auto mb-12 border border-white/5 shadow-2xl">
           <button
             onClick={() => setActiveTab("disponibles")}
             className={`flex-1 text-center py-2.5 px-4 rounded-[50px] font-roboto font-normal text-sm md:text-base transition-all duration-300 ${
