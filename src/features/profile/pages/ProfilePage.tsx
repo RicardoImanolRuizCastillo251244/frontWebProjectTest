@@ -6,7 +6,6 @@ import { getUserProfile, updateUserProfile, changePassword } from '../services/p
 
 // Componentes Modularizados
 import ProfileHeader from '../components/ProfileHeader';
-import ProfileStats from '../components/ProfileStats';
 import ProfileForm from '../components/ProfileForm';
 import LogoutButton from '../components/LogoutButton';
 
@@ -75,16 +74,12 @@ const ProfilePage: React.FC = () => {
 
   return (
     <section className="w-full min-h-[calc(100vh-80px)] bg-[#0F172A] py-12 px-4 flex flex-col items-center">
-      <div className="max-w-4xl w-full mx-auto flex flex-col gap-10">
-        
-        <ProfileHeader username={profile.username} email={profile.email} />
-
-        <div className="grid gap-4">
-          <h3 className="text-white/30 text-xs font-bold uppercase tracking-widest ml-1">Rendimiento</h3>
-          <ProfileStats stats={profile.stats} />
+      <div className="max-w-4xl w-full mx-auto flex flex-col gap-10 items-center">
+        <div className="w-full">
+          <ProfileHeader username={profile.username} />
         </div>
-        
-        <div className="grid gap-4">
+
+        <div className="w-full max-w-2xl">
           <h3 className="text-white/30 text-xs font-bold uppercase tracking-widest ml-1">Ajustes</h3>
           <ProfileForm initialUsername={profile.username} email={profile.email} onSubmit={handleProfileSubmit} saving={saving} successSignal={successSignal} />
           {message && <p className="text-green-400 text-sm mt-2">{message}</p>}
@@ -93,7 +88,6 @@ const ProfilePage: React.FC = () => {
         </div>
 
         <LogoutButton />
-
       </div>
     </section>
   );
