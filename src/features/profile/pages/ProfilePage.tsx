@@ -75,7 +75,7 @@ const ProfilePage: React.FC = () => {
   return (
     <section className="w-full min-h-[calc(100vh-80px)] bg-[#0F172A] py-12 px-4 flex flex-col items-center">
       <div className="max-w-4xl w-full mx-auto flex flex-col gap-10 items-center">
-        <div className="w-full">
+        <div className="w-full mt-8 md:mt-20 lg:mt-24">
           <ProfileHeader username={profile.username} />
         </div>
 
